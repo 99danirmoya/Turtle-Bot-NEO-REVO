@@ -52,7 +52,7 @@ ___
 
 ## Diagrama de conexiones
 
-A continuación, se muestra el diagrama de conexiones del robot. Hacer clic en el botón morado de la imagen para acceder a la simulación de TinkerCAD.
+A continuación, se muestra el diagrama de conexiones del robot.
 
 </div>
 
@@ -60,6 +60,15 @@ A continuación, se muestra el diagrama de conexiones del robot. Hacer clic en e
   <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/TURTLE-BOT-NEOEVO_schematic.jpg" width="750"  style="margin: 10px;"/>
   
   <em>Circuito del Turtle-Bot NEO EVO</em>
+</div>
+<br/>
+
+La tarjeta de prototipado específica empleada para el desarrollo ha sido la LilyGO T3-S3 v1.2:
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/LILYGO_T3_S3_V1_2.jpg" width="750"  style="margin: 10px;"/>
+  
+  <em>Pinout de la tarjeta de prototipado LilyGO T3-S3 v1.2</em>
 </div>
 <br/>
 
