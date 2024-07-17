@@ -1,8 +1,8 @@
 /* ***********************************************************************************************************************************************************
-EJEMPLO - PLANTILLA DE DISPOSITIVO PUBLISH/SUBSCRIBE MQTT: en este skecth sirve para programar un robot de dos ruedas que cuenta con un sensor climatico
-BME280 que publica las medidas cada 5 segundos en el servidor MQTT https://emqx.broker.io para ser procesadas en NodeRED. Además, en NodeRED se crean los
-topicos necesarios para controlar la pantalla OLED, el LED, los servos de rotacion continua y el zumbador a bordo del robot, que reciben los parametros de
-un dashboard de NodeRED por medio de estar suscrito a los topicos donde se envian dichos parametros.
+TURTLE BOT NEO EVO (PUBLISH/SUBSCRIBE MQTT): en este skecth sirve para programar un robot de dos ruedas que cuenta con un sensor climatico BME280 que publica
+las medidas cada 5 segundos en el servidor MQTT https://emqx.broker.io para ser procesadas en NodeRED. Además, en NodeRED se crean los topicos necesarios
+para controlar la pantalla OLED, el LED, los servos de rotacion continua y el zumbador a bordo del robot, que reciben los parametros de un dashboard de
+NodeRED por medio de estar suscrito a los topicos donde se envian dichos parametros.
 *********************************************************************************************************************************************************** */
 
 // ===========================================================================================================================================================
