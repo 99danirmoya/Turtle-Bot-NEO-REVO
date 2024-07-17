@@ -8,7 +8,7 @@ _Hecho con_
 
 [![made-in-ArduinoIDE](https://img.shields.io/badge/Arduino_IDE-00979D?style=for-the-badge&logo=arduino&logoColor=white)](https://www.arduino.cc/)
 
-## Mini rover WiFi con sensor climático, panel OLED, LED y bocina controlado desde NodeRED Dashboard al que se envían los datos recogidos en tiempo real
+## Mini rover WiFi con sensor climático, panel OLED, LED y bocina controlado desde Telegram y NodeRED Dashboard al que se envían los datos recogidos en tiempo real
 
 </div>
 
@@ -57,7 +57,7 @@ A continuación, se muestra el diagrama de conexiones del robot.
 </div>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/TURTLE-BOT-NEOEVO_schematic.jpg" width="750"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/TURTLE-BOT-NEOEVO_schematic.jpg" width="900"  style="margin: 10px;"/>
   
   <em>Circuito del Turtle-Bot NEO EVO</em>
 </div>
@@ -66,7 +66,7 @@ A continuación, se muestra el diagrama de conexiones del robot.
 La tarjeta de prototipado específica empleada para el desarrollo ha sido la LilyGO T3-S3 v1.2:
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/LILYGO_T3_S3_V1_2.jpg" width="750"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/LILYGO_T3_S3_V1_2.jpg" width="600"  style="margin: 10px;"/>
   
   <em>Pinout de la tarjeta de prototipado LilyGO T3-S3 v1.2</em>
 </div>
@@ -86,7 +86,7 @@ Toda la explicación del código de Arduino viene dada en el propio código, [`9
 Por otra parte, se debe importar el flujo que se muestra a continuación desde el archivo [`flow_tbne`](https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/nodered/flow_tbne):
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/NodeRED_flow.jpeg" width="750"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/NodeRED_flow.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Flujo de NodeRED para el control de Turtle-Bot NEO EVO</em>
 </div>
@@ -95,14 +95,14 @@ Por otra parte, se debe importar el flujo que se muestra a continuación desde e
 Con el flujo importado y habiéndose configurado los nodos de MQTT, Telegram, función e InfluxDB, se puede acceder al siguiente panel de control y monitoreo del sensor:
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_2.jpeg" width="750"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_2.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Dashboard de NodeRED para el control y monitoreo climático a borde de Turtle-Bot NEO EVO</em>
 </div>
 <br/>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_1.jpeg" width="750"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_1.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Dashboard de NodeRED para la visualización historica del sensor climático a bordo</em>
 </div>
@@ -118,7 +118,7 @@ ___
 </div>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/BQ_RENACUAJO.jpg" width="750"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/BQ_RENACUAJO.jpg" width="900"  style="margin: 10px;"/>
 
   <em>Muestra de montaje y cableado</em>
 </div>
