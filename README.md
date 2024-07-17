@@ -24,7 +24,7 @@ _Servicios en la nube ofrecidos por_
 ___
 
 ## Modo de funcionamiento
-1. Se conecta el robot a una WiFi desde otro dispositivo (PC o smartphone)
+1. Se conecta el robot a una WiFi accediendo a su hotspot desde otro dispositivo (PC o smartphone)
 2. En caso de querer usarse el I/O desde Telegram, se deberá crear un bot desde BotFather para acceder a su token y deshabilitar la privacidad en grupos para poder explotar el máximo potencial con el comando `/setprivacy`
 3. Se accede al panel de control en la nube para su pilotaje de forma remota
     - ALTERNATIVAMENTE: Si no se ha accedido aún a NodeRED, se debe importar el flujo (más info a continuación) y configurar los nodos relacionados con MQTT, bots de Telegram e InfluxDB.
