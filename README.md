@@ -18,7 +18,10 @@ ___
 
 ## Modo de funcionamiento
 1. Se conecta el robot a una WiFi desde otro dispositivo (PC o smartphone)
-1. Se accede al panel de control en la nube para su pilotaje de forma remota
+2. En caso de querer usarse el I/O desde Telegram, se deberá crear un bot desde BotFather para acceder a su token y deshabilitar la privacidad en grupos para poder explotar el máximo potencial con el comando `/setprivacy`
+3. Se accede al panel de control en la nube para su pilotaje de forma remota
+    - ALTERNATIVAMENTE: Si no se ha accedido aún a NodeRED, se debe importar el flujo (más info a continuación) y configurar los nodos relacionados con MQTT, bots de Telegram e InfluxDB.
+
 
 ___
 
@@ -54,16 +57,14 @@ A continuación, se muestra el diagrama de conexiones del robot. Hacer clic en e
 </div>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/turtle-bot-neo/blob/main/pics/t725.png" width="750"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/TURTLE-BOT-NEOEVO_schematic.jpg" width="750"  style="margin: 10px;"/>
   
-  <em>Circuito del Turtle-Bot NEO</em>
-
-  [![Static Badge](https://img.shields.io/badge/TINKER_THIS!-8A2BE2?logo=autodesk)](https://www.tinkercad.com/things/kZLjRCSkkIt-turtle-bot-neo)
+  <em>Circuito del Turtle-Bot NEO EVO</em>
 </div>
 <br/>
 
 > [!CAUTION]
-> Debido al número limitado de I/O de TinkerCAD, algunos elementos han sido sustituidos por las alternativas más parecidas, como el joystick por un botón y dos potenciómetros, y los sensores de infrarrojos, por sensores de proximidad (PIR)
+> **OJO**, el microcontrolador usado en el dibujo es el TTGO LoRa32 OLED, antecesor del LilyGO T3-S3 v1.2 que se emplea en este ejemplo. Por ello, el pinout del esquema es distinto, **sólo se debe seguir la ubicación de los pines**.
 
 <div align="justify">
 
@@ -82,7 +83,23 @@ Por otra parte, se debe importar el flujo que se muestra a continuación desde e
 </div>
 <br/>
 
-[`PANEL A DISTANCIA`](https://4f566df1fed52c6e7fd5f661f64ae3eb.balena-devices.com/ui/#!/1?socketid=BDvahPaq06OiHTluAAA4)
+Con el flujo importado y habiéndose configurado los nodos de MQTT, Telegram, función e InfluxDB, se puede acceder al siguiente panel de control y monitoreo del sensor:
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_2.jpeg" width="750"  style="margin: 10px;"/>
+
+  <em>Dashboard de NodeRED para el control y monitoreo climático a borde de Turtle-Bot NEO EVO</em>
+</div>
+<br/>
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_1.jpeg" width="750"  style="margin: 10px;"/>
+
+  <em>Dashboard de NodeRED para la visualización historica del sensor climático a bordo</em>
+</div>
+<br/>
+
+En el siguiente enlace, se puede consultar el [panel a distancia](https://4f566df1fed52c6e7fd5f661f64ae3eb.balena-devices.com/ui/#!/1?socketid=BDvahPaq06OiHTluAAA4) original. **Está configurado para el Turtle-Bot NEO EVO original**.
 
 ___
 ___
