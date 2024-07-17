@@ -15,7 +15,7 @@ _Servicios en la nube ofrecidos por_
 </div>
 <br/>
 
-## Mini rover WiFi con sensor climático, panel OLED, LED y bocina controlado desde Telegram y NodeRED Dashboard al que se envían los datos recogidos en tiempo real
+## Mini rover WiFi con sensor climático, panel OLED, luces LED y bocina controlado desde Telegram y NodeRED Dashboard al que se envían los datos recogidos en tiempo real
 
 </div>
 
