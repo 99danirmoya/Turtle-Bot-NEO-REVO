@@ -8,6 +8,13 @@ _Hecho con_
 
 [![made-in-ArduinoIDE](https://img.shields.io/badge/Arduino_IDE-00979D?style=for-the-badge&logo=arduino&logoColor=white)](https://www.arduino.cc/)
 
+_Servicios en la nube ofrecidos por_
+<div align="center">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEBDzjaVjjedkNWruWr53P-XmtGd00nFSa8Q&s" width="90"  style="margin: 10px;"/>
+
+</div>
+<br/>
+
 ## Mini rover WiFi con sensor climático, panel OLED, LED y bocina controlado desde Telegram y NodeRED Dashboard al que se envían los datos recogidos en tiempo real
 
 </div>
