@@ -88,9 +88,9 @@ ___
 
 ## Modo de implementación
 
-Toda la explicación del código de Arduino viene dada en el propio código, [`99danirmoya/turtle-bot-neo/turtle_bot_neo/turtle_bot_neo.ino`](https://github.com/99danirmoya/turtle-bot-neo/blob/main/turtle_bot_neo/turtle_bot_neo.ino), en formato de comentarios al lado de cada línea.
+Toda la explicación del código de Arduino viene dada en el propio código, [`99danirmoya/Turtle-Bot-NEO-EVO/blob/main/tbne/tbne.ino`](https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/tbne/tbne.ino), en formato de comentarios al lado de cada línea.
 
-Por otra parte, se debe importar el flujo que se muestra a continuación desde el archivo [`flow_tbne`](https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/nodered/flow_tbne):
+Por otra parte, se debe importar el flujo que se muestra a continuación desde el archivo [`flow_tbne.json`](https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/nodered_flow/flow_tbne.json):
 
 <div align="center">
   <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/NodeRED_flow.jpeg" width="900"  style="margin: 10px;"/>
