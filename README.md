@@ -120,14 +120,14 @@ En el siguiente enlace, se puede consultar el [panel a distancia](https://4f566d
 Por otra parte, se puede hacer uso de un bot de Telegram para recibir notificaciones de eventos importantes de la batería (batería baja o batería cargada), así como invocar un menú en el que encender o apagar el panel OLED y la luz OLED al hacer uso del comando `neo2`:
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/telegrambot1.jpg" width="650"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/telegrambot1.jpg" width="550"  style="margin: 10px;"/>
 
   <em>Menú del bot de Telegram para escoger dispositivo al que modificar su estado</em>
 </div>
 <br/>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/telegrambot2.jpg" width="650"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/telegrambot2.jpg" width="550"  style="margin: 10px;"/>
 
   <em>Menú del bot de Telegram para encender o apagar el dispositivo elegido</em>
 </div>
