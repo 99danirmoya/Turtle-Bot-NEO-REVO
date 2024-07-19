@@ -43,8 +43,8 @@ ___
 | ESP32 | 1 |
 | Protoboard | 1 |
 | Chasis | 1 |
-| LED | 2 |
-| Resistencia 220ohm | 2 |
+| LED | 1 |
+| Resistencia 220ohm | 1 |
 | Zumbador | 1 |
 | BME280 | 1 |
 | Servo de rotación continua | 2 |
@@ -117,7 +117,7 @@ Con el flujo importado y habiéndose configurado los nodos de MQTT, Telegram, fu
 
 En el siguiente enlace, se puede consultar el [panel a distancia](https://4f566df1fed52c6e7fd5f661f64ae3eb.balena-devices.com/ui/#!/1?socketid=BDvahPaq06OiHTluAAA4) original. **Está configurado para el Turtle-Bot NEO EVO original**.
 
-Por otra parte, se puede hacer uso de un bot de Telegram para recibir notificaciones de eventos importantes de la batería (batería baja o batería cargada), así como invocar un menú en el que encender o apagar el panel OLED y la luz OLED al hacer uso del comando `neo2`:
+Por otra parte, se puede hacer uso de un bot de Telegram para recibir notificaciones de eventos importantes de la batería (batería baja o batería cargada), así como invocar un menú en el que encender o apagar el panel OLED y la luz OLED al hacer uso del comando `/neo2`:
 
 <div align="center">
   <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/telegrambot1.jpg" width="550"  style="margin: 10px;"/>
