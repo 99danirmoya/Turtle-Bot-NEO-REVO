@@ -102,14 +102,14 @@ Por otra parte, se debe importar el flujo que se muestra a continuación desde e
 Con el flujo importado y habiéndose configurado los nodos de MQTT, Telegram, función e InfluxDB, se puede acceder al siguiente panel de control y monitoreo del sensor:
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_2_1.jpeg" width="900"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_1_1.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Dashboard de NodeRED para el control y monitoreo climático a borde de Turtle-Bot NEO EVO</em>
 </div>
 <br/>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_1_1.jpeg" width="900"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/DASHBOARD_2_1.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Dashboard de NodeRED para la visualización historica del sensor climático a bordo</em>
 </div>
