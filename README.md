@@ -47,7 +47,7 @@ ___
 | Resistencia 220ohm | 1 |
 | Zumbador | 1 |
 | BME280 | 1 |
-| GPS NEO6M | 1 |
+| GPS NEO-6M | 1 |
 | Servo de rotación continua | 2 |
 | Ruedas | 2 |
 | Jumpers | Los que hagan falta |
