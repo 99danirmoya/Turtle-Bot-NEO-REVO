@@ -1,4 +1,4 @@
-![Static Badge](https://img.shields.io/badge/stability-v1.0-3314333)
+![Static Badge](https://img.shields.io/badge/stability-v2.0-3314333)
 
 # <p align="center"> Turtle-Bot NEO EVO </p>
 
