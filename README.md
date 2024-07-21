@@ -65,7 +65,7 @@ A continuación, se muestra el diagrama de conexiones del robot.
 </div>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/TURTLE-BOT-NEOEVO_schematic.jpg" width="900"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/TURTLE-BOT-NEOEVO_schematic_1.jpg" width="900"  style="margin: 10px;"/>
   
   <em>Circuito del Turtle-Bot NEO EVO</em>
 </div>
