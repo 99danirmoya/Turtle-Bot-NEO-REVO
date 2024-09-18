@@ -119,7 +119,7 @@ Con el flujo importado y habiéndose configurado los nodos de MQTT, Telegram, fu
 
 En el siguiente enlace, se puede consultar el [panel a distancia](https://e047be1273f7b77c71d4d02783f546a4.balena-devices.com/ui/#!/0?socketid=kMCTOBbX9VSPFcfIAAAF) original. **Está configurado para el Turtle-Bot NEO EVO original**.
 
-Por otra parte, se puede hacer uso de un bot de Telegram para recibir notificaciones de eventos importantes de la batería (batería baja o batería cargada), así como invocar un menú en el que encender o apagar el panel OLED y la luz OLED al hacer uso del comando `/neo2`:
+Por otra parte, se puede hacer uso de un bot de Telegram para recibir notificaciones de eventos importantes de la batería (batería baja o batería cargada), así como invocar un menú, creado por [Alex Trostle](https://flows.nodered.org/flow/c8194f9d056455018d2da8ef7e109733), en el que encender o apagar el panel OLED y la luz OLED al hacer uso del comando `/neo2`:
 
 <div align="center">
   <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/telegrambot1.jpg" width="550"  style="margin: 10px;"/>
