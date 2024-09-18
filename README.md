@@ -40,7 +40,7 @@ ___
 
 | Componente | Unidades |
 | ------------- | ------------- |
-| ESP32 | 1 |
+| LilyGO T3 S3 | 1 |
 | Protoboard | 1 |
 | Chasis | 1 |
 | LED | 1 |
@@ -48,6 +48,7 @@ ___
 | Zumbador | 1 |
 | BME280 | 1 |
 | GPS NEO-6M | 1 |
+| SDS011 | 1 |
 | Servo de rotación continua | 2 |
 | Ruedas | 2 |
 | Jumpers | Los que hagan falta |
