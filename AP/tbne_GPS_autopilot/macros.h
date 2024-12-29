@@ -1,4 +1,7 @@
 // MACROS ------------------------------------------------------------------------
+// Serial monitor
+#define SERIAL_ENABLE   1
+
 // Servos
 #define LEFT_SERVO_PIN  18
 #define RIGHT_SERVO_PIN 19
