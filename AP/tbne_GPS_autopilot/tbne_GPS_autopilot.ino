@@ -29,10 +29,7 @@ const int totalCheckpoints = sizeof(checkpoints) / sizeof(checkpoints[0]);      
 int currentCheckpoint = 0;                                                        // Checkpoint controller
 
 // Function prototypes -----------------------------------------------------------
-void moveForward();
-void turnLeft();
-void turnRight();
-void stopRobot();
+void controlMotion(uint8_t leftWheel, uint8_t rightWheel, const String& motionMessage);
 double calculateBearing(double lat1, double lon1, double lat2, double lon2);
 float distanceTo(double lat1, double lon1, double lat2, double lon2);
 
@@ -40,7 +37,10 @@ float distanceTo(double lat1, double lon1, double lat2, double lon2);
 // SETUP
 // ===============================================================================
 void setup() {
-  Serial.begin(115200);
+  // Initialize serial monitor ---------------------------------------------------
+  if(SERIAL_ENABLE){
+    Serial.begin(115200);
+  }
 
   // Initialize GPS --------------------------------------------------------------
     SerialGPS.begin(GPS_BAUD_RATE, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);           // Inicializacion de la comunicacion por serial para el GPS
@@ -55,7 +55,7 @@ void setup() {
   // Initialize servos -----------------------------------------------------------
   leftServo.attach(LEFT_SERVO_PIN);
   rightServo.attach(RIGHT_SERVO_PIN);
-  stopRobot();
+  controlMotion(90, 90, "STOP MOTORS");
 
   Serial.println("Robot initialized. Starting navigation.");
 }
@@ -103,23 +103,23 @@ void loop() {
 
     if(abs(bearingDifference) > 10){                                              // If the bearing difference is significant (10 degrees or more in any orientation)
       if(bearingDifference > 0){                                                  // If the bearing difference is positive, turn to the opposite direction, RIGHT
-        turnRight();
+        controlMotion(60, 60, "TURNING RIGHT");
       }else{                                                                      // Do the same if the difference is negative
-        turnLeft();
+        controlMotion(120, 120, "TURNING LEFT");
       }
     }else{                                                                        // If not, no correction is needed, so move towards the next checkpoint
-      moveForward();
+      controlMotion(60, 120, "MOVING FORWARD");
     }
 
     // Check if close to the target checkpoint -----------------------------------
-    if(distanceTo(currentLat, currentLng, targetLat, targetLng) < 5.0){          // If the robot is 5 meters or less close to the checkpoint, it is considered to be there
+    if(distanceTo(currentLat, currentLng, targetLat, targetLng) < 5.0){           // If the robot is 5 meters or less close to the checkpoint, it is considered to be there
       Serial.println("Checkpoint reached.");
-      stopRobot();                                                                // The robot stops for a second
+      controlMotion(90, 90, "STOP MOTORS");                                       // The robot stops for a second
       delay(1000);
       currentCheckpoint++;                                                        // The next checkpoint is loaded
       if(currentCheckpoint >= totalCheckpoints){                                  // If it is the last checkpoint
         Serial.println("All checkpoints completed. Stopping robot.");             // Stop forever
-        while(1) stopRobot();
+        while(1) controlMotion(90, 90, "STOP MOTORS");
       }
     }
   }
@@ -127,32 +127,14 @@ void loop() {
 // LOOP END ======================================================================
 
 // -------------------------------------------------------------------------------
-// MOTOR MOTION FUNCTIONS
+// MOTOR MOTION FUNCTION
 // -------------------------------------------------------------------------------
-void moveForward(){                                                               // | ---------------------------------------------- |
-  leftServo.write(60);                                                            // | leftServo.write | rightServo.write |   EFFECT  |
-  rightServo.write(120);                                                          // | --------------- | ---------------- | --------- |
-  Serial.println("Moving forward.");                                              // |       45        |       135        |  FORWARD  | 
-}
-
-void turnLeft(){
-  leftServo.write(120);
-  rightServo.write(120);
-  Serial.println("Turning left.");                                                // |      135        |       135        |   LEFT    |
-}
-
-void turnRight(){
-  leftServo.write(60);
-  rightServo.write(60);
-  Serial.println("Turning right.");                                               // |       45        |        45        |   RIGHT   |
-}
-
-void stopRobot(){
-  leftServo.write(90);
-  rightServo.write(90);
-  Serial.println("Stopping robot.");                                              // |       90        |        90        |   STOP    |
-}                                                                                 // | --------------- | ---------------- | --------- |
-// MOTOR MOTION FUNCTIONS END ----------------------------------------------------
+void controlMotion(uint8_t leftWheel, uint8_t rightWheel, const String& motionMessage){  // | leftServo.write | rightServo.write |  EFFECT   |
+  leftServo.write(leftWheel);                                                            // |       60        |       120        |  FORWARD  |
+  rightServo.write(rightWheel);                                                          // |      120        |       120        |   LEFT    |
+  Serial.println(motionMessage);                                                         // |       60        |        60        |   RIGHT   |
+}                                                                                        // |       90        |        90        |   STOP    |
+// MOTOR MOTION FUNCTION END -----------------------------------------------------
 
 // -------------------------------------------------------------------------------
 // BEARING COMPUTATION
@@ -175,7 +157,7 @@ double calculateBearing(double lat1, double lon1, double lat2, double lon2){    
 // -------------------------------------------------------------------------------
 // DISTANCE TO THE NEXT CHECKPOINT COMPUTATION
 // -------------------------------------------------------------------------------
-float distanceTo(double lat1, double lon1, double lat2, double lon2){           // Calculate Euclidean distance
+float distanceTo(double lat1, double lon1, double lat2, double lon2){             // Calculate Euclidean distance
   lat1 = radians(lat1);
   lon1 = radians(lon1);
   lat2 = radians(lat2);
