@@ -48,6 +48,7 @@ ___
 | Zumbador | 1 |
 | BME280 | 1 |
 | GPS NEO-6M | 1 |
+| HMC5883L | 1 |
 | SDS011 | 1 |
 | Servo de rotación continua | 2 |
 | Ruedas | 2 |
