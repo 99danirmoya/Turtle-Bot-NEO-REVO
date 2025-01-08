@@ -79,7 +79,7 @@ del robot, que reciben los parametros de un dashboard de NodeRED por medio de es
 // ===========================================================================================================================================================
 // CONSTRUCTORES DE OBJETOS DE CLASE DE LIBRERIA, VARIABLES GLOBALES, CONSTANTES...
 // ===========================================================================================================================================================
-const char* mqtt_server = "broker.hivemq.com";                                                                                              // Broker MQTT. Se ha elegido EMQX por ser gratuito y robusto
+const char* mqtt_server = "srv-iot.diatel.upm.es";                                                                                          // Broker MQTT. UPM broker
 WiFiClient espClient;                                                                                                                       // Objeto de la libreria WiFiManager
 PubSubClient client(espClient);                                                                                                             // Objeto de la libreria MQTT
 
@@ -429,7 +429,7 @@ void updateOledDisplay(){
 void reconnect(){
   while(!client.connected()){                                                                                                               // Itera hasta reconectar, O SIMPLEMENTE CONECTAR
     Serial.print(F("Attempting MQTT connection..."));
-    if (client.connect("ESP32_Moya")) {                                                                                                     // Conexion establecida con el dispositivo MQTT. CUIDADO QUE AQUI SE PUEDE AÑADIR ,"USER", "PASSWORD"
+    if (client.connect("hSQ6oIHn5dJsslmQEdsk")) {                                                                                           // Conexion establecida con el dispositivo MQTT. CUIDADO QUE AQUI SE PUEDE AÑADIR ,"USER", "PASSWORD" (UPM THINGSBOARD DEVICE TOKEN)
       Serial.println(F("connected"));
 
       // ===================================================================================================================================================
