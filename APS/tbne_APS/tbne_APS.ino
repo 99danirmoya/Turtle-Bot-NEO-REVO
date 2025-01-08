@@ -79,7 +79,7 @@ del robot, que reciben los parametros de un dashboard de NodeRED por medio de es
 // ===========================================================================================================================================================
 // CONSTRUCTORES DE OBJETOS DE CLASE DE LIBRERIA, VARIABLES GLOBALES, CONSTANTES...
 // ===========================================================================================================================================================
-const char* mqtt_server = "broker.emqx.io";                                                                                                 // Broker MQTT. Se ha elegido EMQX por ser gratuito y robusto
+const char* mqtt_server = "broker.hivemq.com";                                                                                              // Broker MQTT. Se ha elegido EMQX por ser gratuito y robusto
 WiFiClient espClient;                                                                                                                       // Objeto de la libreria WiFiManager
 PubSubClient client(espClient);                                                                                                             // Objeto de la libreria MQTT
 
