@@ -157,8 +157,6 @@ VXyNWQKV3WKdwrnuWih0hKWbt5DHDAff9Yk2dDLWKMGwsAvgnEzDHNb842m1R0aB
 L6KCq9NjRHDEjf8tM7qtj3u1cIiuPhnPQCjY/MiQu12ZIvVS5ljFH4gxQ+6IHdfG
 jjxDah2nGN59PRbxYvnKkKj9
 -----END CERTIFICATE-----)EOF";                                                                                          // Certificado para el cifrado TLS de MQTT en Thingsboard
-
-volatile bool oledStateON = false, oledStateOFF = false, ledStateON = false, ledStateOFF = false, claxonState = false;   // Volatile flags that change the state among tasks
 // GLOBAL VARIABLES END ======================================================================================================================================
 
 // ===========================================================================================================================================================
