@@ -144,7 +144,7 @@ ___
 </div>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/BQ_RENACUAJO.jpg" width="900"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/photo_5789838300280900015_y.jpg" width="900"  style="margin: 10px;"/>
 
   <em>Muestra de montaje y cableado</em>
 </div>
