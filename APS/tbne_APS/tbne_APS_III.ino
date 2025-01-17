@@ -725,18 +725,20 @@ void callback(char* topic, byte* message, unsigned int length){                 
     }
 
     // Extract joystick values -----------------------------------------------------------------------------------------------------------------------------
-    joystickData joyData;
-    if(doc.containsKey("xAxis")){
-      joyData.potXaxis = doc["xAxis"];
-    }
-    if (doc.containsKey("yAxis")) {
-      joyData.potYaxis = doc["yAxis"];
-    }
+    if(doc.containsKey("xAxis") || doc.containsKey("yAxis")){
+      joystickData joyData;
+      if(doc.containsKey("xAxis")){
+        joyData.potXaxis = doc["xAxis"];
+      }
+      if (doc.containsKey("yAxis")) {
+        joyData.potYaxis = doc["yAxis"];
+      }
 
-    if(!xQueueSend(joystickQueue, &joyData, portMAX_DELAY)){                                                             // Send data to queue
-      if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-        Serial.println(F("Cola del joystick ha fallado!"));
-        xSemaphoreGive(semaphoreSerial);
+      if(!xQueueSend(joystickQueue, &joyData, portMAX_DELAY)){                                                             // Send data to queue
+        if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+          Serial.println(F("Cola del joystick ha fallado!"));
+          xSemaphoreGive(semaphoreSerial);
+        }
       }
     }
   }
