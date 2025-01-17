@@ -13,12 +13,14 @@ que reciben los parametros de un dashboard de NodeRED por medio de estar suscrit
 #include <WiFiManager.h>                                                                                                 // Liberia para crear un hotspot desde el que configurar la conexion WiFi
 #include <WiFiClientSecure.h>                                                                                            // Liberia para añadir certificados de conexion segura
 #include <PubSubClient.h>                                                                                                // Libreria para MQTT
+
 #include <ArduinoJson.h>                                                                                                 // Libreria para parsear textos en formato JSON facilmente
 
 #include <Wire.h>                                                                                                        // Libreria del bus I2C
 
 #include <Adafruit_Sensor.h>                                                                                             // Libreria para usar sensores de Adafruit
 #include <Adafruit_BME280.h>                                                                                             // Libreria del BME280
+#include <Adafruit_HMC5883_U.h>                                                                                          // Libreria para usar la brujula HMC5883L
 
 #include <Adafruit_GFX.h>                                                                                                // Libreria complementaria para el panel OLED
 #include <Adafruit_SSD1306.h>                                                                                            // Libreria especifica para el panel OLED de 128x64 pixeles
@@ -26,8 +28,6 @@ que reciben los parametros de un dashboard de NodeRED por medio de estar suscrit
 #include <ESP32Servo.h>                                                                                                  // Libreria para manejos de servos para placas que usen ESP32
 
 #include <TinyGPS++.h>                                                                                                   // Libreria para usar el GPS NEO-6M por puerto serie
-
-#include <Adafruit_HMC5883_U.h>                                                                                          // Libreria para usar la brujula HMC5883L
 
 #include <SoftwareSerial.h>                                                                                              // Libreria para crear puertos serie virtuales en GPIO comunes
 // LIBRERIAS END =============================================================================================================================================
@@ -353,6 +353,8 @@ void flagsTask(void* pvParameters){
   const TickType_t claxonTimeON = pdMS_TO_TICKS(500);
   bool claxonON = false;
 
+  bool oledON = false;
+  
   uint32_t notificationValue;
 
   while(true){
@@ -375,67 +377,12 @@ void flagsTask(void* pvParameters){
 
       // ON OLED -----------------------------------------------------------------------------------------------------------------------------------------------
       if(notificationValue & (1 << 2)){                                                                                                     // Actualiza el OLED si esta encendido y han pasado 5 segundos
-        sensorData data;
-        if(!xQueueReceive(sensorQueueOLED, &data, pdMS_TO_TICKS(100))){
-          if((xTaskGetTickCount() - lastReceivedTime) > errorThreshold){
-            if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-              Serial.println(F("\t\t\tError recibiendo datos de la cola de sensores"));
-              xSemaphoreGive(semaphoreSerial);
-            }
-            lastReceivedTime = xTaskGetTickCount();
-          }
-        }else{
-          lastReceivedTime = xTaskGetTickCount();
-          if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){  
-            Serial.println(F("\t\t\tACTUALIZAR OLED"));
-            xSemaphoreGive(semaphoreSerial);
-          }
-          oled.clearDisplay();                                                                                             // Se limpia el buffer del OLED
-          oled.setTextSize(1);                                                                                             // Se selecciona el tamaño de la letra
-
-          oled.setCursor(10, 5);                                                                                           // Se indica el pixel donde se quiere escribir (X,Y)
-          oled.print("Temp: ");                                                                                            // Se escribe un string
-          oled.setCursor(40, 5);
-          oled.print(data.temp);                                                                                           // Se escribe el valor actual de la temperatura del BME280
-          oled.setCursor(75, 5);
-          oled.print((char)247);
-          oled.setCursor(81, 5);
-          oled.println("C");
-
-          oled.setCursor(10, 17);
-          oled.print("Pres: ");
-          oled.setCursor(40, 17);
-          oled.print(data.pres);
-          oled.setCursor(80, 17);
-          oled.print(" hPa");
-
-          oled.setCursor(10, 29);
-          oled.print("Alti: ");
-          oled.setCursor(40, 29);
-          oled.print(data.alt);
-          oled.setCursor(70, 29);
-          oled.print(" m");
-
-          oled.setCursor(10, 41);
-          oled.print("Hume: ");
-          oled.setCursor(40, 41);
-          oled.print(data.hum);
-          oled.setCursor(70, 41);
-          oled.print(" %");
-
-          oled.setCursor(10, 53);
-          oled.print("Bate: ");
-          oled.setCursor(40, 53);
-          oled.print(data.vbat);                                                                                           // Calculo matematico siguiendo el circuito de lectura de bateria de LilyGO para expresar el voltaje en el conector de bateria
-          oled.setCursor(65, 53);
-          oled.print(" V");
-
-          oled.display();
-        }
+        oledON = true;
       }
 
       // OFF OLED ---------------------------------------------------------------------------------------------------------------------------------------------
       if (notificationValue & (1 << 3)) { // OLED OFF
+        oledON = false;
         oled.clearDisplay();                                                                                               // Se limpia el buffer del OLED
         oled.display();                                                                                                    // Se printea el buffer que, como no es nada, se apaga
       }
@@ -450,6 +397,68 @@ void flagsTask(void* pvParameters){
       }
     }
 
+    // Update OLED while it is ON
+    if(oledON){  
+      sensorData data;
+      if(!xQueueReceive(sensorQueueOLED, &data, pdMS_TO_TICKS(100))){
+        if((xTaskGetTickCount() - lastReceivedTime) > errorThreshold){
+          if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+            Serial.println(F("\t\t\tError recibiendo datos de la cola de sensores"));
+            xSemaphoreGive(semaphoreSerial);
+          }
+          lastReceivedTime = xTaskGetTickCount();
+        }
+      }else{
+        lastReceivedTime = xTaskGetTickCount();
+        if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){  
+          Serial.println(F("\t\t\tACTUALIZAR OLED"));
+          xSemaphoreGive(semaphoreSerial);
+        }
+        oled.clearDisplay();                                                                                             // Se limpia el buffer del OLED
+        oled.setTextSize(1);                                                                                             // Se selecciona el tamaño de la letra
+
+        oled.setCursor(10, 5);                                                                                           // Se indica el pixel donde se quiere escribir (X,Y)
+        oled.print("Temp: ");                                                                                            // Se escribe un string
+        oled.setCursor(40, 5);
+        oled.print(data.temp);                                                                                           // Se escribe el valor actual de la temperatura del BME280
+        oled.setCursor(75, 5);
+        oled.print((char)247);
+        oled.setCursor(81, 5);
+        oled.println("C");
+
+        oled.setCursor(10, 17);
+        oled.print("Pres: ");
+        oled.setCursor(40, 17);
+        oled.print(data.pres);
+        oled.setCursor(80, 17);
+        oled.print(" hPa");
+
+        oled.setCursor(10, 29);
+        oled.print("Alti: ");
+        oled.setCursor(40, 29);
+        oled.print(data.alt);
+        oled.setCursor(70, 29);
+        oled.print(" m");
+
+        oled.setCursor(10, 41);
+        oled.print("Hume: ");
+        oled.setCursor(40, 41);
+        oled.print(data.hum);
+        oled.setCursor(70, 41);
+        oled.print(" %");
+
+        oled.setCursor(10, 53);
+        oled.print("Bate: ");
+        oled.setCursor(40, 53);
+        oled.print(data.vbat);                                                                                           // Calculo matematico siguiendo el circuito de lectura de bateria de LilyGO para expresar el voltaje en el conector de bateria
+        oled.setCursor(65, 53);
+        oled.print(" V");
+
+        oled.display();
+      }
+    }
+      
+    // Keep claxon ON for the desired time    
     if(claxonON && (xTaskGetTickCount() - claxonStartTime >= claxonTimeON)){
       ledcWriteTone(BUZZER_PIN, 0);
       claxonON = false;
