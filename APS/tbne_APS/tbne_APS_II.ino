@@ -10,10 +10,10 @@ que reciben los parametros de un dashboard de NodeRED por medio de estar suscrit
 // ===========================================================================================================================================================
 #include <Arduino.h>                                                                                                     // Libreria de Arduino para garantizar que se aplican funciones propias tambien en la ESP32 S3
 
-#include <WiFiManager.h>
-#include <WiFiClientSecure.h>
+#include <WiFiManager.h>                                                                                                 // Liberia para crear un hotspot desde el que configurar la conexion WiFi
+#include <WiFiClientSecure.h>                                                                                            // Liberia para añadir certificados de conexion segura
 #include <PubSubClient.h>                                                                                                // Libreria para MQTT
-#include <ArduinoJson.h>
+#include <ArduinoJson.h>                                                                                                 // Libreria para parsear textos en formato JSON facilmente
 
 #include <Wire.h>                                                                                                        // Libreria del bus I2C
 
@@ -102,12 +102,14 @@ Servo miServoLeft;                                                              
 // ===========================================================================================================================================================
 // STRUCTS
 // ===========================================================================================================================================================
-struct sensorData {
+// Struct para los datos de sensores -------------------------------------------------------------------------------------------------------------------------
+struct sensorData{
   float temp, hum, alt, pres, vbat, lat, lon, veloc, pm2_5, pm10, heading;                                               // Definicion de las variables 'float'
   uint8_t sat;                                                                                                           // Variable en la que se guarda el numero de satelites en cobertura del GPS
 };
 
-struct joystickData {
+// Struct para los valores de los ejes del joystick virtual --------------------------------------------------------------------------------------------------
+struct joystickData{
   int8_t potXaxis = 0, potYaxis = 0;
 };
 // STRUCTS END ===============================================================================================================================================
@@ -115,11 +117,11 @@ struct joystickData {
 // ===========================================================================================================================================================
 // GLOBAL VARIABLES
 // ===========================================================================================================================================================
-const char* mqtt_server = "srv-iot.diatel.upm.es";
-const int mqtt_port = 8883;
+const char* mqtt_server = "srv-iot.diatel.upm.es";                                                                       // Broker MQTT de la UPM
+const int mqtt_port = 8883;                                                                                              // Puerto del Broker MQTT
 const char* mqttTopicPub = "v1/devices/me/telemetry";
 const char* mqttTopicSub = "v1/devices/me/attributes";
-const char* access_token = "c80zn9tfv9oiluyp2tss";
+const char* access_token = "c80zn9tfv9oiluyp2tss";                                                                       // Token unico del dispositivo en Thingsboard
 
 const char* root_ca = R"EOF(-----BEGIN CERTIFICATE-----
 MIIF3jCCA8agAwIBAgIQAf1tMPyjylGoG7xkDjUDLTANBgkqhkiG9w0BAQwFADCB
@@ -154,41 +156,34 @@ qS3fuQL39ZeatTXaw2ewh0qpKJ4jjv9cJ2vhsE/zB+4ALtRZh8tSQZXq9EfX7mRB
 VXyNWQKV3WKdwrnuWih0hKWbt5DHDAff9Yk2dDLWKMGwsAvgnEzDHNb842m1R0aB
 L6KCq9NjRHDEjf8tM7qtj3u1cIiuPhnPQCjY/MiQu12ZIvVS5ljFH4gxQ+6IHdfG
 jjxDah2nGN59PRbxYvnKkKj9
------END CERTIFICATE-----)EOF";
-
-int pm25int, pm10int;
-int8_t servoXPosition, servoYPosition;                                                                                   // Definicion de las variables 'int8_t'
-
-float pm25last = 0.0, pm10last = 0.0;
+-----END CERTIFICATE-----)EOF";                                                                                          // Certificado para el cifrado TLS de MQTT en Thingsboard
 
 volatile bool oledStateON = false, oledStateOFF = false, ledStateON = false, ledStateOFF = false, claxonState = false;   // Volatile flags that change the state among tasks
-bool claxonON = false;                                                                                                   // Simple state flags
-unsigned long lastOledUpdateTime = 0, claxonStartTime = 0;
 // GLOBAL VARIABLES END ======================================================================================================================================
 
 // ===========================================================================================================================================================
 // FREERTOS CONSTRUCTORS
 // ===========================================================================================================================================================
-// Task handles
+// Task handles ----------------------------------------------------------------------------------------------------------------------------------------------
 TaskHandle_t mqttTaskHandle, sensorTaskHandle, actuatorTaskHandle, flagsTaskHandle;
 
-// Sensor queue
+// Sensor queue ----------------------------------------------------------------------------------------------------------------------------------------------
 QueueHandle_t sensorQueuePub = 0, sensorQueueOLED = 0, joystickQueue = 0;
 
-// Semaphore
+// Semaphore -------------------------------------------------------------------------------------------------------------------------------------------------
 SemaphoreHandle_t semaphoreSerial;
 // FREERTOS CONSTRUCTORS END =================================================================================================================================
 
 // ===========================================================================================================================================================
 // FUNCTION PROTOTYPES
 // ===========================================================================================================================================================
-// Tasks
+// Tasks -----------------------------------------------------------------------------------------------------------------------------------------------------
 void mqttTask(void*);
 void sensorTask(void*);
 void flagsTask(void*);
 void actuatorTask(void*);
 
-// Auxiliary functions
+// Auxiliary functions ---------------------------------------------------------------------------------------------------------------------------------------
 void callback(char*, byte*, unsigned int);
 void reconnect();
 float current_heading();
@@ -201,42 +196,41 @@ void mqttTask(void* pvParameters) {
   TickType_t lastReceivedTime = xTaskGetTickCount();                                                                     // Timestamp for the last data received
   const TickType_t errorThreshold = pdMS_TO_TICKS(6000);                                                                 // 6-second threshold
 
-  while (true) {
-    if (!mqttClient.connected()) {                                                                                       // Si no hay conexion
+  while(true){
+    if(!mqttClient.connected()){                                                                                         // Si no hay conexion
       reconnect();                                                                                                       // Entra la funcion de reconexion
     }
     mqttClient.loop();
 
     sensorData data;
-    if (!xQueueReceive(sensorQueuePub, &data, pdMS_TO_TICKS(100))) {
-      if ((xTaskGetTickCount() - lastReceivedTime) > errorThreshold) {
+    if(!xQueueReceive(sensorQueuePub, &data, pdMS_TO_TICKS(100))){
+      if((xTaskGetTickCount() - lastReceivedTime) > errorThreshold){
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("Error recibiendo datos de la cola de sensores!"));
           xSemaphoreGive(semaphoreSerial);
         }
         lastReceivedTime = xTaskGetTickCount();                                                                          // Reset the timestamp to avoid repeated prints
       }
-    } else {
+    }else{
+      lastReceivedTime = xTaskGetTickCount();                                                                            // Update the timestamp when data is received
       // ===================================================================================================================================================
       // MQTT PUBLISH
       // ===================================================================================================================================================
-      lastReceivedTime = xTaskGetTickCount();                                                                            // Update the timestamp when data is received
-
-      if (WiFi.status() == WL_CONNECTED) {                                                                               // Check WiFi connection status
+      if(WiFi.status() == WL_CONNECTED){                                                                                 // Check WiFi connection status
         char dataStr[256];                                                                                               // Se crea un string de caracteres para guardar ambas medidas, se reservan 60 espacios
-
         sprintf(dataStr, "{\"temperature\":%5.2f,\"pressure\":%6.2f,\"altitude\":%4.2f,\"humidity\":%4.2f,\"battery\":%4.3f,\"latitude\":%10.6f,\"longitude\":%10.6f,\"sats\":%1d,\"speed\":%5.2f,\"PM2.5\":%6.2f,\"PM10\":%6.2f,\"heading\":%5.2f}",
                 data.temp, data.pres, data.alt, data.hum, data.vbat, data.lat, data.lon, data.sat, data.veloc, data.pm2_5, data.pm10, data.heading);  // La funcion 'sprintf' de C++ se usa para poder introducir las medidas y elegir el ancho de numero y su precision. Las medidas se separan con una coma ','
-        if (mqttClient.publish(mqttTopicPub, dataStr)) {                                                                 // Se publica el string con los datos de los sensores en el topico 'moya/sensores'
+        
+        if(mqttClient.publish(mqttTopicPub, dataStr)){                                                                   // Se publica el string con los datos de los sensores en el topico 'moya/sensores'
           Serial.println(dataStr);                                                                                       // Muestra en el serial de Arduino el string
-        } else {
+        }else{
           if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
             Serial.println(F("Failed to publish data"));
             xSemaphoreGive(semaphoreSerial);
           }
         }
         // MQTT PUBLISH END ==================================================================================================================================
-      } else {
+      }else{
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("WiFi Disconnected"));
           xSemaphoreGive(semaphoreSerial);
@@ -251,8 +245,11 @@ void mqttTask(void* pvParameters) {
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 // SENSOR TASK - TRAS HABERSE COMPLETADO LA CONFIGURACION INICIAL, ESTE ES EL ALGORITMO PARA LEER LOS SENSORES
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
-void sensorTask(void* pvParameters) {
-  while (true) {
+void sensorTask(void* pvParameters){
+  int pm25int, pm10int;
+  float pm25last = 0.0, pm10last = 0.0;
+
+  while(true){
     sensorData data;
 
     data.temp = bme.readTemperature();                                                                                   // Variable que guarda la temperatura del sensor BME280
@@ -263,14 +260,14 @@ void sensorTask(void* pvParameters) {
     data.heading = current_heading();                                                                                    // Variable que guarda la orientacion del robot con respecto a N
 
     // Preparacion del GPS para tener cobertura satelite y poder enviar coordenadas --------------------------------------------------------------------------
-    while (SerialGPS.available() > 0) {                                                                                  // Mientras haya bytes disponibles en el puerto serie del GPS
-      if (gps.encode(SerialGPS.read())) {                                                                                // Se confirma que haya lecturas del GPS
+    while(SerialGPS.available() > 0){                                                                                    // Mientras haya bytes disponibles en el puerto serie del GPS
+      if(gps.encode(SerialGPS.read())){                                                                                  // Se confirma que haya lecturas del GPS
         if (gps.location.isValid()) {                                                                                    // Si las coordenadas recogidas son validas
           data.lat = gps.location.lat();                                                                                 // Se guardan en las variables 'lat' y 'lon' dichas coordenadas
           data.lon = gps.location.lng();
           data.sat = gps.satellites.value();
           data.veloc = gps.speed.kmph();
-        } else {                                                                                                         // En caso de que sean invalidas, se muestra un mensaje en el monitor serie
+        }else{                                                                                                           // En caso de que sean invalidas, se muestra un mensaje en el monitor serie
           data.lat = 0.0;                                                                                                // Por marcar un numero definido, la ubicacion se fija a 0 en ambos 'lat' y 'lon'
           data.lon = 0.0;
           data.sat = 0;
@@ -278,7 +275,7 @@ void sensorTask(void* pvParameters) {
         }
       }
     }
-    if (data.sat == 0) {
+    if(data.sat == 0){
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.println(F("\tINVALID GPS "));
         xSemaphoreGive(semaphoreSerial);
@@ -286,8 +283,8 @@ void sensorTask(void* pvParameters) {
     }
 
     // Preparacion del SDS011 para mandar los bytes que contienen las medidas de PM2.5 y PM10 ----------------------------------------------------------------
-    while (sds.available() && sds.read() != 0xAA) {}                                                                     // Look for the starting byte of the SDS011 data frame
-    if (sds.available()) {
+    while(sds.available() && sds.read() != 0xAA);                                                                        // Look for the starting byte of the SDS011 data frame
+    if(sds.available()){
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.println(F("\tData available from SDS011..."));
         xSemaphoreGive(semaphoreSerial);
@@ -295,9 +292,9 @@ void sensorTask(void* pvParameters) {
     }
     byte buffer[10];                                                                                                     // Once we have the starting byte, attempt to read the next 9 bytes
     buffer[0] = 0xAA;                                                                                                    // The starting byte we already found
-    if (sds.available() >= 9) {
+    if(sds.available() >= 9){
       sds.readBytes(&buffer[1], 9);
-      if (buffer[9] == 0xAB) {                                                                                           // Check if the last byte is the correct ending byte
+      if(buffer[9] == 0xAB){                                                                                             // Check if the last byte is the correct ending byte
         pm25int = (buffer[3] << 8) | buffer[2];
         pm10int = (buffer[5] << 8) | buffer[4];
         data.pm2_5 = pm25int / 10.0;
@@ -305,7 +302,7 @@ void sensorTask(void* pvParameters) {
 
         pm25last = data.pm2_5;
         pm10last = data.pm10;
-      } else {
+      }else{
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("\tInvalid ending byte from SDS011"));
           xSemaphoreGive(semaphoreSerial);
@@ -320,7 +317,7 @@ void sensorTask(void* pvParameters) {
       }
     }
 
-    if (millis() > 15000 && gps.charsProcessed() < 10) {                                                                 // Si durante 15 segundos se cumple que los caracteres procesados del GPS son menos de 10, implica que hay un error leyendo el GPS, se reporta el fallo y se bloquea el programa hasta que se solvente el error
+    if((xTaskGetTickCount() > pdMS_TO_TICKS(15000)) && (gps.charsProcessed() < 10)){                                     // Si durante 15 segundos se cumple que los caracteres procesados del GPS son menos de 10, implica que hay un error leyendo el GPS, se reporta el fallo y se bloquea el programa hasta que se solvente el error
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.println(F("\tGPS no detectado: comprueba el cableado"));
         xSemaphoreGive(semaphoreSerial);
@@ -329,13 +326,13 @@ void sensorTask(void* pvParameters) {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    if (!xQueueSend(sensorQueuePub, &data, pdMS_TO_TICKS(100))) {
+    if(!xQueueSend(sensorQueuePub, &data, pdMS_TO_TICKS(100))){
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.println(F("\tCola de sensores publisher ha fallado!"));
         xSemaphoreGive(semaphoreSerial);
       }
     }
-    if (!xQueueSend(sensorQueueOLED, &data, pdMS_TO_TICKS(100))) {
+    if(!xQueueSend(sensorQueueOLED, &data, pdMS_TO_TICKS(100))){
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.println(F("\tCola de sensores OLED ha fallado!"));
         xSemaphoreGive(semaphoreSerial);
@@ -350,14 +347,18 @@ void sensorTask(void* pvParameters) {
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 // FLAGS TASK - TRAS HABERSE COMPLETADO LA CONFIGURACION INICIAL, ESTE ES EL ALGORITMO QUE GESTIONA EL I/O DIGITAL CON VOLATILE BOOL FLAGS
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
-void flagsTask(void* pvParameters) {
+void flagsTask(void* pvParameters){
   TickType_t lastReceivedTime = xTaskGetTickCount();                                                                     // Timestamp for the last data received
   const TickType_t errorThreshold = pdMS_TO_TICKS(6000);                                                                 // 6-second threshold
+  
+  TickType_t claxonStartTime = 0;
+  const TickType_t claxonTimeON = pdMS_TO_TICKS(500);
+  bool claxonON = false;
 
-  while (true) {
+  while(true){
     // ON LED ------------------------------------------------------------------------------------------------------------------------------------------------
-    if (ledStateON) {
-      for (int i = 0; i <= 255; i += 1) {
+    if(ledStateON){
+      for(int i = 0; i <= 255; i += 1){
         ledcWrite(LED_PIN, i);
         vTaskDelay(pdMS_TO_TICKS(1));
       }
@@ -365,8 +366,8 @@ void flagsTask(void* pvParameters) {
     }
 
     // OFF LED -----------------------------------------------------------------------------------------------------------------------------------------------
-    if (ledStateOFF) {
-      for (int i = 255; i >= 0; i -= 1) {
+    if(ledStateOFF){
+      for(int i = 255; i >= 0; i -= 1){
         ledcWrite(LED_PIN, i);
         vTaskDelay(pdMS_TO_TICKS(1));
       }
@@ -376,9 +377,9 @@ void flagsTask(void* pvParameters) {
     // ON OLED -----------------------------------------------------------------------------------------------------------------------------------------------
     sensorData data;
 
-    if (oledStateON) {                                                                                                   // Actualiza el OLED si esta encendido y han pasado 5 segundos
-      if (!xQueueReceive(sensorQueueOLED, &data, pdMS_TO_TICKS(100))) {
-        if ((xTaskGetTickCount() - lastReceivedTime) > errorThreshold) {
+    if(oledStateON){                                                                                                     // Actualiza el OLED si esta encendido y han pasado 5 segundos
+      if(!xQueueReceive(sensorQueueOLED, &data, pdMS_TO_TICKS(100))){
+        if((xTaskGetTickCount() - lastReceivedTime) > errorThreshold){
           if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
             Serial.println(F("\t\t\tError recibiendo datos de la cola de sensores"));
             xSemaphoreGive(semaphoreSerial);
@@ -436,7 +437,7 @@ void flagsTask(void* pvParameters) {
     }
 
     // OFF OLED ---------------------------------------------------------------------------------------------------------------------------------------------
-    if (oledStateOFF) {
+    if(oledStateOFF){
       oledStateON = false;
       oled.clearDisplay();                                                                                               // Se limpia el buffer del OLED
       oled.display();                                                                                                    // Se printea el buffer que, como no es nada, se apaga
@@ -444,13 +445,13 @@ void flagsTask(void* pvParameters) {
     }
 
     // CLAXON FOR 500 ms -------------------------------------------------------------------------------------------------------------------------------------
-    if (claxonState && !claxonON) {
+    if(claxonState && !claxonON){
       ledcWriteTone(BUZZER_PIN, 500);
-      claxonStartTime = millis();
+      claxonStartTime = xTaskGetTickCount();
       claxonON = true;
       claxonState = false;
     }
-    if (claxonON && millis() - claxonStartTime >= 500) {
+    if(claxonON && (xTaskGetTickCount() - claxonStartTime >= claxonTimeON)){
       ledcWriteTone(BUZZER_PIN, 0);
       claxonON = false;
     }
@@ -462,16 +463,18 @@ void flagsTask(void* pvParameters) {
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 // ACTUATOR TASK - TRAS HABERSE COMPLETADO LA CONFIGURACION INICIAL, ESTE ES EL ALGORITMO PARA EJECUTAR LAS ORDENES DE LOS SERVOS
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
-void actuatorTask(void* pvParameters) {
+void actuatorTask(void* pvParameters){
+  int8_t servoXPosition, servoYPosition;
+
   while (true) {
     joystickData joyData;
 
-    if (!xQueueReceive(joystickQueue, &joyData, portMAX_DELAY)) {
+    if(!xQueueReceive(joystickQueue, &joyData, portMAX_DELAY)){
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.println(F("\t\t\tError recibiendo datos de la cola del joystick"));
         xSemaphoreGive(semaphoreSerial);
       }
-    } else {
+    }else{
       servoXPosition = map(joyData.potXaxis, -100, 100, 45, -45);                                                        // Posición neutra del eje X del joystick es 0, que corresponde a 0º en el servo. Respectivamente, -100 es 45º y 100, -45º. Devuelve valores de -45 a 45
       servoYPosition = map(joyData.potYaxis, -100, 100, -45, 45);                                                        // Lo mismo para el eje Y del joystick es al revés, -100 es -45º y 100, 45º
 
@@ -508,7 +511,7 @@ void actuatorTask(void* pvParameters) {
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 // FUNCION SETUP - SOLO SE EJECUTA UNA VEZ
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
-void setup() {
+void setup(){
   #if ENABLE_DEBUG == 1                                                                                                  // Activar o desactivar desde "configuration.h" el monitor serial para debugging
     Serial.begin(115200);
   #endif
@@ -549,18 +552,18 @@ void setup() {
 
   // BME280 ------------------------------------------------------------------------------------------------------------------------------------------------
   Wire.begin(SDA_BME, SCL_BME);                                                                                          // Initialize I2C for the BME280. SDA, SCL
-  if (!bme.begin(0x76)) {
+  if(!bme.begin(0x76)){
     Serial.println(F("No encuentro un sensor BME280 valido!"));
-    while (1);
-  } else {
+    while(1);
+  }else{
     Serial.println(F("BME280 inicializado!"));
   }
 
   // HMC5883 -----------------------------------------------------------------------------------------------------------------------------------------------
-  if (!mag.begin()) {
+  if(!mag.begin()){
     Serial.println(F("No encuentro un sensor HMC5883L valido!"));
-    while (1);
-  } else {
+    while(1);
+  }else{
     Serial.println(F("HMC5883L inicializada!"));
   }
   // INICIALIZACION DE I/O END =============================================================================================================================
@@ -574,11 +577,11 @@ void setup() {
 
   res = wm.autoConnect("AP_Moya", "m3di4l4b");                                                                           // Modo del hotspot con nombre y contraseña personalizados
 
-  if (!res) {
+  if(!res){
     Serial.println(F("Incapaz de conectarse a la WiFi elegida, RESET"));
     delay(1000);
     ESP.restart();
-  } else {                                                                                                               // Si 'res' devuelve un true, es que la conexion es exitosa
+  }else{                                                                                                                 // Si 'res' devuelve un true, es que la conexion es exitosa
     Serial.println(F("¡Conectado a la WiFi elegida!"));
     Serial.print(F("IP Address: "));
     Serial.println(WiFi.localIP());
@@ -657,7 +660,7 @@ void loop() {
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
 // FUNCION CALLBACK - FUNCION A LA QUE LLEGAN LOS MENSAJES DE LOS TOPICOS SUSCRITOS PARA HACER CAMBIOS EN EL MICRO, ES COMO UN SEGUNDO LOOP
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
-void callback(char* topic, byte* message, unsigned int length) {                                                         // Funcion que recibe el topico MQTT, el mensaje y la longitud del mismo
+void callback(char* topic, byte* message, unsigned int length){                                                          // Funcion que recibe el topico MQTT, el mensaje y la longitud del mismo
   String messageSub;
 
   if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
@@ -675,11 +678,11 @@ void callback(char* topic, byte* message, unsigned int length) {                
   // =======================================================================================================================================================
   // Feel free to add more if statements to control more GPIOs with MQTT
   // =======================================================================================================================================================
-  if (String(topic) == mqttTopicSub) {                                                                                   // Again, ensure the topic is the desired one
+  if(String(topic) == mqttTopicSub){                                                                                     // Again, ensure the topic is the desired one
     // Parse the JSON object -------------------------------------------------------------------------------------------------------------------------------
     StaticJsonDocument<128> doc;
     DeserializationError error = deserializeJson(doc, messageSub);
-    if (error) {
+    if(error){
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.print("\t\tJSON deserialization failed: ");
         Serial.println(error.c_str());
@@ -689,7 +692,7 @@ void callback(char* topic, byte* message, unsigned int length) {                
     }
 
     // Extract LED -----------------------------------------------------------------------------------------------------------------------------------------
-    if (doc.containsKey("led")) {
+    if(doc.containsKey("led")){
       if(doc["led"].as<bool>()){
         ledStateON = true;
       }else{
@@ -698,7 +701,7 @@ void callback(char* topic, byte* message, unsigned int length) {                
     }
 
      // Extract OLED ---------------------------------------------------------------------------------------------------------------------------------------
-    if (doc.containsKey("oled")) {
+    if(doc.containsKey("oled")){
       if(doc["oled"].as<bool>()){
         oledStateON = true;
       }else{
@@ -707,7 +710,7 @@ void callback(char* topic, byte* message, unsigned int length) {                
     }
 
     // Extract buzzer --------------------------------------------------------------------------------------------------------------------------------------
-    if (doc.containsKey("buzzer")) {
+    if(doc.containsKey("buzzer")){
       if(doc["buzzer"].as<bool>()){
         claxonState = true;
       }
@@ -715,14 +718,14 @@ void callback(char* topic, byte* message, unsigned int length) {                
 
     // Extract joystick values -----------------------------------------------------------------------------------------------------------------------------
     joystickData joyData;
-    if (doc.containsKey("xAxis")) {
+    if(doc.containsKey("xAxis")){
       joyData.potXaxis = doc["xAxis"];
     }
     if (doc.containsKey("yAxis")) {
       joyData.potYaxis = doc["yAxis"];
     }
 
-    if (!xQueueSend(joystickQueue, &joyData, portMAX_DELAY)) {                                                           // Send data to queue
+    if(!xQueueSend(joystickQueue, &joyData, portMAX_DELAY)){                                                             // Send data to queue
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.println(F("Cola del joystick ha fallado!"));
         xSemaphoreGive(semaphoreSerial);
@@ -738,12 +741,12 @@ void callback(char* topic, byte* message, unsigned int length) {                
 // FUNCION RECONNECT - FUNCION QUE ESTABLECE LA CONNEXION POR MQTT PARA RECIBIR LOS MENSAJES DE LOS TOPICOS A LOS QUE SE ESTA SUSCRITO
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
 void reconnect() {
-  while (!mqttClient.connected()) {                                                                                      // Itera hasta reconectar, O SIMPLEMENTE CONECTAR
+  while(!mqttClient.connected()){                                                                                        // Itera hasta reconectar, O SIMPLEMENTE CONECTAR
     if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
       Serial.print(F("Attempting MQTT connection..."));
       xSemaphoreGive(semaphoreSerial);
     }
-    if (mqttClient.connect("ESP32_Moya", access_token, NULL)) {                                                          // Conexion establecida con el dispositivo MQTT. CUIDADO QUE AQUI SE PUEDE AÑADIR ,"USER", "PASSWORD"
+    if(mqttClient.connect("ESP32_Moya", access_token, NULL)){                                                            // Conexion establecida con el dispositivo MQTT. CUIDADO QUE AQUI SE PUEDE AÑADIR ,"USER", "PASSWORD"
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.println(F("connected"));
         xSemaphoreGive(semaphoreSerial);
@@ -755,7 +758,7 @@ void reconnect() {
       mqttClient.subscribe(mqttTopicSub);
       // ===================================================================================================================================================
 
-    } else {
+    }else{
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.print(F("failed, rc="));                                                                                  // Si no se establece conexion
         Serial.print(mqttClient.state());
@@ -771,7 +774,7 @@ void reconnect() {
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
 // FUNCION PARA CALCULAR LA ORIENTACION ACTUAL
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
-float current_heading() {
+float current_heading(){
   sensors_event_t event;
   mag.getEvent(&event);
 
@@ -779,8 +782,8 @@ float current_heading() {
   float declinationAngle = 0.007;
   head += declinationAngle;
 
-  if (head < 0) head += 2 * PI;                                                                                          // Correct for when signs are reversed
-  if (head > 2 * PI) head -= 2 * PI;                                                                                     // Check for wrap due to addition of declination
+  if(head < 0) head += 2 * PI;                                                                                          // Correct for when signs are reversed
+  if(head > 2 * PI) head -= 2 * PI;                                                                                     // Check for wrap due to addition of declination
 
   return head * 180 / M_PI;
 }
