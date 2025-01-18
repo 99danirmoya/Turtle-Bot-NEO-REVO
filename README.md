@@ -62,6 +62,15 @@ ___
 
 ## Diagrama de conexiones
 
+La tarjeta de prototipado específica empleada para el desarrollo ha sido la LilyGO T3-S3 v1.2:
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/Screenshot%202025-01-18%20221859.png" width="600"  style="margin: 10px;"/>
+  
+  <em>Pinout de la tarjeta de prototipado LilyGO T3-S3 v1.2</em>
+</div>
+<br/>
+
 A continuación, se muestra el diagrama de conexiones del robot.
 
 </div>
@@ -70,15 +79,6 @@ A continuación, se muestra el diagrama de conexiones del robot.
   <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/TURTLE-BOT-NEOEVO_schematic_1.jpg" width="900"  style="margin: 10px;"/>
   
   <em>Circuito del Turtle-Bot NEO EVO</em>
-</div>
-<br/>
-
-La tarjeta de prototipado específica empleada para el desarrollo ha sido la LilyGO T3-S3 v1.2:
-
-<div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/Screenshot%202025-01-18%20221859.png" width="600"  style="margin: 10px;"/>
-  
-  <em>Pinout de la tarjeta de prototipado LilyGO T3-S3 v1.2</em>
 </div>
 <br/>
 
