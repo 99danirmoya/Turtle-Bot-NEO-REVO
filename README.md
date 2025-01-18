@@ -1,6 +1,6 @@
 ![Static Badge](https://img.shields.io/badge/stability-v3.0-3314333)
 
-# <p align="center"> Turtle-Bot NEO EVO </p>
+# <p align="center"> Turtle-Bot NEO REVO (rover2) </p>
 
 <div align="center">
 
