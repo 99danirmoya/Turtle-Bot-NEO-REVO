@@ -15,7 +15,7 @@ _Servicios en la nube ofrecidos por_
 </div>
 <br/>
 
-## Mini rover WiFi con sensor climático y de material particulado, GPS, panel OLED, luces LED y bocina controlado desde Telegram y NodeRED Dashboard a los que se envían los datos recogidos en tiempo real
+## Mini rover WiFi con sensor climático y de material particulado, GPS, mangnetómetro, panel OLED, luces LED y bocina controlado desde Telegram y NodeRED Dashboard/Thingsboard a los que se envían los datos recogidos en tiempo real. Cuenta con dos modos de operación: manual y auto-pilotado por coordenadas GPS
 
 </div>
 
@@ -158,7 +158,7 @@ ___
 <br/>
 
 > [!NOTE]
-> Esta imagen es únicamente una muestra orientativa. Lo razonable sería montar tanto el Arduino UNO como la protoboard sobre el chasis y distanciar el switch de tres posiciones y el joystick a modo de mando. El chasis está hecho en impresión 3D y vale cualquiera que venga preparado para servos y los sensores elegidos para cada modo
+> Esta imagen es únicamente una muestra orientativa. El chasis está hecho en impresión 3D/metacrilato y vale cualquiera que venga preparado para servos y los sensores elegidos para cada modo
 
 ___
 
