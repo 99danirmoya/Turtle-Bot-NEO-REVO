@@ -46,11 +46,11 @@ ___
 4. [Modo de implementación](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#modo-de-implementaci%C3%B3n)
 5. [Licencia](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#-licencia-)
 6. [Contacto](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#-contacto-)
-7. 
+
 ___
 ___
 
-## Modo de funcionamiento
+## Modo de funcionamiento [:leftwards_arrow_with_hook:](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#%C3%ADndice)
 1. Se conecta el robot a una WiFi accediendo a su hotspot desde otro dispositivo (PC o smartphone)
 2. En caso de querer usarse el I/O desde Telegram, se deberá crear un bot desde BotFather para acceder a su token y deshabilitar la privacidad en grupos para poder explotar el máximo potencial con el comando `/setprivacy`
 3. Se accede al panel de control en la nube para su pilotaje de forma remota
@@ -60,7 +60,7 @@ ___
 
 </div>
 
-## <p align="justify">  Lista de componentes </p>
+## <p align="justify">  Lista de componentes [:leftwards_arrow_with_hook:](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#%C3%ADndice) </p>
 
 <div align="center">
 
@@ -86,7 +86,7 @@ ___
 
 ___
 
-## Diagrama de conexiones
+## Diagrama de conexiones [:leftwards_arrow_with_hook:](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#%C3%ADndice)
 
 La tarjeta de prototipado específica empleada para el desarrollo ha sido la LilyGO T3-S3 v1.2:
 
@@ -115,7 +115,7 @@ A continuación, se muestra el diagrama de conexiones del robot.
 
 ___
 
-## Modo de implementación
+## Modo de implementación [:leftwards_arrow_with_hook:](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#%C3%ADndice)
 
 Toda la explicación del código de Arduino viene dada en el propio código, [`99danirmoya/Turtle-Bot-NEO-EVO/blob/main/tbne/tbne.ino`](https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/tbne/tbne.ino), en formato de comentarios al lado de cada línea. Cabe destacar la implementación de freeRTOS para fragmentar en tareas ejecutadas en paralelo para mejorar los tiempos de respuesta.
 
@@ -172,13 +172,13 @@ Por otra parte, se puede hacer uso de un bot de Telegram para recibir notificaci
 ___
 ___
 
-## <p align="justify"> Licencia </p>
+## <p align="justify"> Licencia [:leftwards_arrow_with_hook:](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#%C3%ADndice) </p>
 
 Este proyecto está licenciado bajo la [GPL-3.0 license](https://github.com/99danirmoya/turtle-bot-neo?tab=GPL-3.0-1-ov-file).
 
 ___
 
-## <p align="justify"> Contacto </p>
+## <p align="justify"> Contacto [:leftwards_arrow_with_hook:](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#%C3%ADndice) </p>
 
 > [!IMPORTANT]
 > Respondo amablemente a dudas y leo sugerencias: [![Gmail Badge](https://img.shields.io/badge/-Gmail-c14438?style=for-the-badge&logo=Gmail&logoColor=white&link=mailto:daniel.rodriguezm99@gmail.com)](mailto:daniel.rodriguezm99@gmail.com)
