@@ -23,12 +23,27 @@ _Servicios en la nube ofrecidos por_
 
 ___
 
+## Demo del proyecto
+
+</div>
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/photo_5789838300280900015_y.jpg" width="900"  style="margin: 10px;"/>
+
+  <em>Muestra de montaje y cableado</em>
+</div>
+<br/>
+
+> [!NOTE]
+> Esta imagen es únicamente una muestra orientativa. El chasis está hecho en impresión 3D/metacrilato y vale cualquiera que venga preparado para servos y los sensores elegidos para cada modo
+
+___
+
 ## Modo de funcionamiento
 1. Se conecta el robot a una WiFi accediendo a su hotspot desde otro dispositivo (PC o smartphone)
 2. En caso de querer usarse el I/O desde Telegram, se deberá crear un bot desde BotFather para acceder a su token y deshabilitar la privacidad en grupos para poder explotar el máximo potencial con el comando `/setprivacy`
 3. Se accede al panel de control en la nube para su pilotaje de forma remota
     - ALTERNATIVAMENTE: Si no se ha accedido aún a NodeRED, se debe importar el flujo (más info a continuación) y configurar los nodos relacionados con MQTT, bots de Telegram e InfluxDB.
-
 
 ___
 
@@ -144,24 +159,6 @@ Por otra parte, se puede hacer uso de un bot de Telegram para recibir notificaci
 <br/>
 
 ___
-___
-
-## Ejemplo de montaje
-
-</div>
-
-<div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/photo_5789838300280900015_y.jpg" width="900"  style="margin: 10px;"/>
-
-  <em>Muestra de montaje y cableado</em>
-</div>
-<br/>
-
-> [!NOTE]
-> Esta imagen es únicamente una muestra orientativa. El chasis está hecho en impresión 3D/metacrilato y vale cualquiera que venga preparado para servos y los sensores elegidos para cada modo
-
-___
-
 ___
 
 ## <p align="justify"> Licencia </p>
