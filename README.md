@@ -38,6 +38,16 @@ ___
 > Esta imagen es únicamente una muestra orientativa. El chasis está hecho en impresión 3D/metacrilato y vale cualquiera que venga preparado para servos y los sensores elegidos para cada modo
 
 ___
+
+## Índice
+1. [Modo de funcionamiento](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#modo-de-funcionamiento)
+2. [Lista de componentes](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#--lista-de-componentes-)
+3. [Diagrama de conexiones](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#diagrama-de-conexiones)
+4. [Modo de implementación](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#modo-de-implementaci%C3%B3n)
+5. [Licencia](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#-licencia-)
+6. [Contacto](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#-contacto-)
+7. 
+___
 ___
 
 ## Modo de funcionamiento
