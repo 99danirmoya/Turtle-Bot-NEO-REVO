@@ -38,6 +38,7 @@ ___
 > Esta imagen es únicamente una muestra orientativa. El chasis está hecho en impresión 3D/metacrilato y vale cualquiera que venga preparado para servos y los sensores elegidos para cada modo
 
 ___
+___
 
 ## Modo de funcionamiento
 1. Se conecta el robot a una WiFi accediendo a su hotspot desde otro dispositivo (PC o smartphone)
