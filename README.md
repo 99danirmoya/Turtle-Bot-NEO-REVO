@@ -120,7 +120,7 @@ ___
 Toda la explicación del código de Arduino viene dada en el propio código, [`99danirmoya/Turtle-Bot-NEO-EVO/blob/main/tbne/tbne.ino`](https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/tbne/tbne.ino), en formato de comentarios al lado de cada línea. Cabe destacar la implementación de freeRTOS para fragmentar en tareas ejecutadas en paralelo para mejorar los tiempos de respuesta.
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/rover2.jpeg" width="900"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/rover2_2.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Diagrama de bloques de la implementación en freeRTOS</em>
 </div>
