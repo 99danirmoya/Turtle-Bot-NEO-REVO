@@ -89,7 +89,7 @@ que reciben los parametros de un dashboard de NodeRED por medio de estar suscrit
 #define BUZZER_PIN 42
 
 // Macros auto-pilot -----------------------------------------------------------------------------------------------------------------------------------------
-#define METERS_PER_DEGREE_LAT 111000                                              // Approximation of distance (meters per degree): 111,000 meters/degree latitude
+#define METERS_PER_DEGREE_LAT 111000                                                                                     // Approximation of distance (meters per degree): 111,000 meters/degree latitude
 
 // Macros para temporalizaciones -----------------------------------------------------------------------------------------------------------------------------
 // MACROS END ================================================================================================================================================
@@ -118,18 +118,18 @@ Servo miServoLeft;                                                              
 // STRUCTS
 // ===========================================================================================================================================================
 // Struct para los datos de sensores -------------------------------------------------------------------------------------------------------------------------
-static struct sensorData{
-  float temp, hum, alt, pres, vbat, lat, lon, veloc, pm2_5, pm10, heading;                                               // Definicion de las variables 'float'
-  uint8_t sat;                                                                                                           // Variable en la que se guarda el numero de satelites en cobertura del GPS
+struct sensorData{
+  float temp = 0.0f, hum = 0.0f, alt = 0.0f, pres = 0.0f, vbat = 0.0f, lat = 0.0f, lon = 0.0f, veloc = 0.0f, pm2_5 = 0.0f, pm10 = 0.0f, heading = 0.0f;                                               // Definicion de las variables 'float'
+  uint8_t sat = 0;                                                                                                       // Variable en la que se guarda el numero de satelites en cobertura del GPS
 };
 
 // Struct para los datos del auto-pilot
-static struct APData{
-  float lat, lon, heading;
+struct APData{
+  float lat  = 0.0f, lon = 0.0f, heading = 0.0f;
 };
 
 // Struct para los valores de los ejes del joystick virtual --------------------------------------------------------------------------------------------------
-static struct joystickData{
+struct joystickData{
   int8_t potXaxis = 0, potYaxis = 0;
 };
 // STRUCTS END ===============================================================================================================================================
@@ -183,13 +183,13 @@ jjxDah2nGN59PRbxYvnKkKj9
 // FREERTOS CONSTRUCTORS
 // ===========================================================================================================================================================
 // Task handles ----------------------------------------------------------------------------------------------------------------------------------------------
-static TaskHandle_t mqttTaskHandle, sensorTaskHandle, actuatorTaskHandle, flagsTaskHandle, autoPilotTaskHandle;
+static TaskHandle_t mqttTaskHandle = NULL, sensorTaskHandle = NULL, actuatorTaskHandle = NULL, flagsTaskHandle = NULL, autoPilotTaskHandle = NULL;
 
 // Sensor queue ----------------------------------------------------------------------------------------------------------------------------------------------
 static QueueHandle_t sensorQueuePub = NULL, sensorQueueAP = NULL, joystickQueue = NULL;
 
 // Semaphore -------------------------------------------------------------------------------------------------------------------------------------------------
-static SemaphoreHandle_t semaphoreSerial;
+static SemaphoreHandle_t semaphoreSerial = NULL;
 // FREERTOS CONSTRUCTORS END =================================================================================================================================
 
 // ===========================================================================================================================================================
@@ -220,11 +220,11 @@ static void mqttTask(void* pvParameters) {
     if(!mqttClient.connected()){                                                                                         // Si no hay conexion
       reconnect();                                                                                                       // Entra la funcion de reconexion
     }
-    mqttClient.loop();
+    mqttClient.loop();                                                                                                   // Funcion principal, tiene que estar corriendo a la mayor frecuencia posible y nunca ser interrumpida
 
     sensorData sData;
-    if(!xQueueReceive(sensorQueuePub, &sData, pdMS_TO_TICKS(100))){
-      if((xTaskGetTickCount() - lastReceivedTime) > errorThreshold){
+    if(!xQueueReceive(sensorQueuePub, &sData, pdMS_TO_TICKS(100))){                                                      // Si tras 100 ms la cola no recibe nada, salta el error. Debe hacerse así para bloquear la ejecucion lo menos posible sin afectar al loop de MQTT
+      if((xTaskGetTickCount() - lastReceivedTime) > errorThreshold){                                                     // Sin embargo, el error como tal es unicamente si la cola no recibe nada tras 6 segundos. Deberia recibir cada 5 segundos
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("Error recibiendo datos de la cola de sensores!"));
           xSemaphoreGive(semaphoreSerial);
@@ -266,21 +266,21 @@ static void mqttTask(void* pvParameters) {
 // SENSOR TASK - TRAS HABERSE COMPLETADO LA CONFIGURACION INICIAL, ESTE ES EL ALGORITMO PARA LEER LOS SENSORES
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 static void sensorTask(void* pvParameters){
-  TickType_t lastSendTime = xTaskGetTickCount();                                                                     // Timestamp for the last data received
+  TickType_t lastSendTime = xTaskGetTickCount();                                                                         // Timestamp for the last data received
   const TickType_t sensorQueuePubInterval = pdMS_TO_TICKS(5000);                                                         // 5-second interval
   
   uint32_t notificationValue;
   bool AUTO_PILOT = false;
 
-  int pm25int, pm10int;
-  float pm25last = 0.0, pm10last = 0.0;
-  float latTemp = 0.0, lonTemp = 0.0, satTemp = 0, velocTemp = 0.0, headingTemp = 0.0;
+  int pm25int = 0, pm10int = 0;
+  float pm25last = 0.0f, pm10last = 0.0f;
+  float latTemp = 0.0f, lonTemp = 0.0f, satTemp = 0, velocTemp = 0.0f, headingTemp = 0.0f;
 
   while(true){
     sensorData sData;
     APData aData;
     
-    // Check if pilot mode has been changed -----------------------------------------------------------------------------------------------------------------
+    // Check if pilot mode has been changed ------------------------------------------------------------------------------------------------------------------
     if(xTaskNotifyWait(0, 0xFFFFFFFF, &notificationValue, pdMS_TO_TICKS(10))){
       if(notificationValue & (1 << 10)) {
         AUTO_PILOT = true;
@@ -298,23 +298,24 @@ static void sensorTask(void* pvParameters){
       }
     }
 
-    // Lectura del angulo de direccion respecto de N ---------------------------------------------------------------------------------------------------------
+    // SHARED VARIABLES FOR BOTH PUBLISH AND AUTO-PILOT ------------------------------------------------------------------------------------------------------
+    // Lectura del angulo de direccion respecto de N
     float declinationAngle = ((26.0 / 60.0)) / (180 / PI);
     compass.setDeclinationAngle(declinationAngle);
     sVector_t mag = compass.readRaw();
     compass.getHeadingDegrees();
     headingTemp = mag.HeadingDegress;                                                                                    // Variable que guarda la orientacion del robot con respecto a N
 
-    // Preparacion del GPS para tener cobertura satelite y poder enviar coordenadas --------------------------------------------------------------------------
+    // Preparacion del GPS para tener cobertura satelite y poder enviar coordenadas
     while(SerialGPS.available() > 0){                                                                                    // Mientras haya bytes disponibles en el puerto serie del GPS
       if(gps.encode(SerialGPS.read())){                                                                                  // Se confirma que haya lecturas del GPS
         if (gps.location.isValid()) {                                                                                    // Si las coordenadas recogidas son validas
-          latTemp = gps.location.lat();                                                                                 // Se guardan en las variables 'lat' y 'lon' dichas coordenadas
+          latTemp = gps.location.lat();                                                                                  // Se guardan en las variables 'lat' y 'lon' dichas coordenadas
           lonTemp = gps.location.lng();
           satTemp = gps.satellites.value();
           velocTemp = gps.speed.kmph();
         }else{                                                                                                           // En caso de que sean invalidas, se muestra un mensaje en el monitor serie
-          latTemp = 0.0;                                                                                                // Por marcar un numero definido, la ubicacion se fija a 0 en ambos 'lat' y 'lon'
+          latTemp = 0.0;                                                                                                 // Por marcar un numero definido, la ubicacion se fija a 0 en ambos 'lat' y 'lon'
           lonTemp = 0.0;
           satTemp = 0;
           velocTemp = 0.0;
@@ -329,11 +330,16 @@ static void sensorTask(void* pvParameters){
       }
       vTaskDelay(pdMS_TO_TICKS(15000));
     }
+    // SHARED VARIABLES END ----------------------------------------------------------------------------------------------------------------------------------
     
+    // Auto-pilot queue --------------------------------------------------------------------------------------------------------------------------------------
     if(AUTO_PILOT){
+      // Geo-location variables
       aData.heading = headingTemp;
       aData.lat = latTemp;
       aData.lon = lonTemp;
+      
+      // Queue sender
       if(!xQueueSend(sensorQueueAP, &aData, 0)){
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("\tCola de sensores auto-pilot ha fallado!"));
@@ -341,8 +347,11 @@ static void sensorTask(void* pvParameters){
         }
       }
     }
+    // Auto-pilot queue END ----------------------------------------------------------------------------------------------------------------------------------
 
+    // Publish queue -----------------------------------------------------------------------------------------------------------------------------------------
     if((xTaskGetTickCount() - lastSendTime) > sensorQueuePubInterval){
+      // Geo-location variables
       sData.heading = headingTemp;
       sData.lat = latTemp;
       sData.lon = lonTemp;
@@ -356,41 +365,41 @@ static void sensorTask(void* pvParameters){
         }
       }
 
-      // Lectura del BME280 ------------------------------------------------------------------------------------------------------------------------------------
-      sData.temp = bme.readTemperature();                                                                                   // Variable que guarda la temperatura del sensor BME280
-      sData.pres = bme.readPressure() / 100.0F;                                                                             // Variable que guarda la presion del sensor BME280
-      sData.alt = bme.readAltitude(SEALEVELPRESSURE_HPA);                                                                   // Variable que guarda la altitud del sensor BME280
-      sData.hum = bme.readHumidity();                                                                                       // Variable que guarda la humedad del sensor BME280
+      // Lectura del BME280
+      sData.temp = bme.readTemperature();                                                                                // Variable que guarda la temperatura del sensor BME280
+      sData.pres = bme.readPressure() / 100.0F;                                                                          // Variable que guarda la presion del sensor BME280
+      sData.alt = bme.readAltitude(SEALEVELPRESSURE_HPA);                                                                // Variable que guarda la altitud del sensor BME280
+      sData.hum = bme.readHumidity();                                                                                    // Variable que guarda la humedad del sensor BME280
       
-      // Lectura de la celda 18650 del shield por medio del divisor resistivo ----------------------------------------------------------------------------------
-      sData.vbat = (float)(analogRead(VBAT_PIN)) / 4095 * 2 * 3.3 * 1.1;                                                    // Variable que guarda el valor del voltaje en el conector de batería
+      // Lectura de la celda 18650 del shield por medio del divisor resistivo
+      sData.vbat = (float)(analogRead(VBAT_PIN)) / 4095 * 2 * 3.3 * 1.1;                                                 // Variable que guarda el valor del voltaje en el conector de batería
 
-      // Preparacion del SDS011 para mandar los bytes que contienen las medidas de PM2.5 y PM10 ----------------------------------------------------------------
-      while(sds.available() && sds.read() != 0xAA);                                                                        // Look for the starting byte of the SDS011 data frame
+      // Preparacion del SDS011 para mandar los bytes que contienen las medidas de PM2.5 y PM10
+      while(sds.available() && sds.read() != 0xAA);                                                                      // Look for the starting byte of the SDS011 data frame
       if(sds.available()){
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("\tData available from SDS011..."));
           xSemaphoreGive(semaphoreSerial);
         }
       }
-      byte buffer[10];                                                                                                     // Once we have the starting byte, attempt to read the next 9 bytes
-      buffer[0] = 0xAA;                                                                                                    // The starting byte we already found
+      byte buffer[10];                                                                                                   // Once we have the starting byte, attempt to read the next 9 bytes
+      buffer[0] = 0xAA;                                                                                                  // The starting byte we already found
       if(sds.available() >= 9){
         sds.readBytes(&buffer[1], 9);
-        if(buffer[9] == 0xAB){                                                                                             // Check if the last byte is the correct ending byte
+        if(buffer[9] == 0xAB){                                                                                           // Check if the last byte is the correct ending byte
           pm25int = (buffer[3] << 8) | buffer[2];
           pm10int = (buffer[5] << 8) | buffer[4];
           sData.pm2_5 = pm25int / 10.0;
           sData.pm10 = pm10int / 10.0;
 
-          pm25last = sData.pm2_5;
+          pm25last = sData.pm2_5;                                                                                        // Make a backup in case that the sensor does not read, the next iteration just repeats the last valid one
           pm10last = sData.pm10;
         }else{
           if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
             Serial.println(F("\tInvalid ending byte from SDS011"));
             xSemaphoreGive(semaphoreSerial);
           }
-          sData.pm2_5 = pm25last;
+          sData.pm2_5 = pm25last;                                                                                        // If invalid, the repeat the last valid
           sData.pm10 = pm10last;
         }
       }else{
@@ -400,6 +409,7 @@ static void sensorTask(void* pvParameters){
         }
       }
 
+      // Queue sender
       if(!xQueueSend(sensorQueuePub, &sData, 0)) {
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("\tCola de sensores publisher ha fallado!"));
@@ -410,7 +420,7 @@ static void sensorTask(void* pvParameters){
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    vTaskDelay(pdMS_TO_TICKS(500));                                                                                     // Read every 250 seconds, the most demanding queue
+    vTaskDelay(pdMS_TO_TICKS(500));                                                                                      // Read every 250 seconds, the most demanding queue
   }
 }
 // SENSOR TASK END -------------------------------------------------------------------------------------------------------------------------------------------
@@ -424,11 +434,11 @@ static void flagsTask(void* pvParameters){
   uint32_t notificationValue;
 
   while(true){
-    if(xTaskNotifyWait(0, 0xFFFFFFFF, &notificationValue, pdMS_TO_TICKS(1000))){
+    if(xTaskNotifyWait(0, 0xFFFFFFFF, &notificationValue, pdMS_TO_TICKS(1000))){                                         // Every second, wait for new flags. Only bits are cleared on exit so no residual flags are processed the next execution
       oled.setTextSize(1);                                                                                               // Se selecciona el tamaño de la letra
 
       // FIRE ALARM ON ---------------------------------------------------------------------------------------------------------------------------------------
-      if (notificationValue & (1 << 0)) {
+      if(notificationValue & (1 << 0)){                                                                                  // Receives the corresponding thread flag bit
         FIRE_ALARM = true;
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("\t\t\tFIRE ALARM ON"));
@@ -557,8 +567,8 @@ static void flagsTask(void* pvParameters){
         vTaskDelay(pdMS_TO_TICKS(1));
       }
     }else{
-      oled.clearDisplay();                                                                                             // Se limpia el buffer del OLED
-      oled.display();                                                                                                  // Se printea el buffer que, como no es nada, se apaga
+      oled.clearDisplay();                                                                                               // Se limpia el buffer del OLED
+      oled.display();                                                                                                    // Se printea el buffer que, como no es nada, se apaga
     }
 
     vTaskDelay(pdMS_TO_TICKS(100));                                                                                      // Small delay
@@ -627,8 +637,8 @@ static void autoPilotTask(void* pvParameters){
     {43.527208, -5.632747}
   };
 
-  const int totalCheckpoints = sizeof(checkpoints) / sizeof(checkpoints[0]);        // Autoadjastable checkpoint number the first 'sizeof' is the total amount of elements while the second is always 16 bytes, as it is the amount of elements to define a coordinate
-  int currentCheckpoint = 0;                                                        // Checkpoint controller
+  const int totalCheckpoints = sizeof(checkpoints) / sizeof(checkpoints[0]);                                             // Autoadjastable checkpoint number the first 'sizeof' is the total amount of elements while the second is always 16 bytes, as it is the amount of elements to define a coordinate
+  int currentCheckpoint = 0;                                                                                             // Checkpoint controller
 
   while (true) {
     APData aData;
@@ -639,7 +649,7 @@ static void autoPilotTask(void* pvParameters){
         xSemaphoreGive(semaphoreSerial);
       }
     }else{
-      // Get current and target coordinates
+      // Get current and target coordinates ----------------------------------------------------------------------------------------------------------------
       double currentLat = aData.lat;
       double currentLon = aData.lon;
       double targetLat = checkpoints[currentCheckpoint][0];
@@ -653,34 +663,34 @@ static void autoPilotTask(void* pvParameters){
         xSemaphoreGive(semaphoreSerial);
       }
 
-      // Calculate bearing to target
+      // Calculate bearing to target -----------------------------------------------------------------------------------------------------------------------
       double targetBearing = calculateBearing(currentLat, currentLon, targetLat, targetLon);
 
-      // Get current heading from queue
+      // Get current heading from queue --------------------------------------------------------------------------------------------------------------------
       double currentHeading = aData.heading;
 
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
         Serial.print(F("\t\t\tTarget Bearing: "));
-        Serial.println(targetBearing);                                                // Next checkpoint orientation angle
+        Serial.println(targetBearing);                                                                                   // Next checkpoint orientation angle
         Serial.print(F("Current Heading: "));
-        Serial.println(currentHeading);                                               // Current orientation angle
+        Serial.println(currentHeading);                                                                                  // Current orientation angle
         xSemaphoreGive(semaphoreSerial);
       }
       
-      // Adjust direction ----------------------------------------------------------
-      double bearingDifference = targetBearing - currentHeading;                    // Bearing difference is the substraction of the target orientation and the current one
-      if(bearingDifference > 180) bearingDifference -= 360;                         // Bearings must be in the [-180, 180] degree range, so if it exceeds 180º, it must be replaced by its equivalent negative counterpart in the valid range
-      if(bearingDifference < -180) bearingDifference += 360;                        // Same for those bearings exceeding -180
+      // Adjust direction ----------------------------------------------------------------------------------------------------------------------------------
+      double bearingDifference = targetBearing - currentHeading;                                                         // Bearing difference is the substraction of the target orientation and the current one
+      if(bearingDifference > 180) bearingDifference -= 360;                                                              // Bearings must be in the [-180, 180] degree range, so if it exceeds 180º, it must be replaced by its equivalent negative counterpart in the valid range
+      if(bearingDifference < -180) bearingDifference += 360;                                                             // Same for those bearings exceeding -180
 
-      if(abs(bearingDifference) > 10){                                              // If the bearing difference is significant (10 degrees or more in any orientation)
-        if(bearingDifference > 0){                                                  // If the bearing difference is positive, turn to the opposite direction, RIGHT
+      if(abs(bearingDifference) > 10){                                                                                   // If the bearing difference is significant (10 degrees or more in any orientation)
+        if(bearingDifference > 0){                                                                                       // If the bearing difference is positive, turn to the opposite direction, RIGHT
           miServoRight.write(CLOCKWISE_RIGHT);
           miServoLeft.write(CLOCKWISE_LEFT);
           if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
             Serial.println(F("\t\t\tCLOCKWISE COUNTERSTEER"));
             xSemaphoreGive(semaphoreSerial);
           }
-        }else{                                                                      // Do the same if the difference is negative
+        }else{                                                                                                           // Do the same if the difference is negative
           miServoRight.write(COUNTERCLOCKWISE_RIGHT);
           miServoLeft.write(COUNTERCLOCKWISE_LEFT);
           if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
@@ -688,7 +698,7 @@ static void autoPilotTask(void* pvParameters){
             xSemaphoreGive(semaphoreSerial);
           }
         }
-      }else{                                                                        // If not, no correction is needed, so move towards the next checkpoint
+      }else{                                                                                                             // If not, no correction is needed, so move towards the next checkpoint
         miServoRight.write(FORWARD_RIGHT);
         miServoLeft.write(FORWARD_LEFT);
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
@@ -697,8 +707,8 @@ static void autoPilotTask(void* pvParameters){
         }
       }
 
-      // Check if close to the target checkpoint -----------------------------------
-      if(distanceTo(currentLat, currentLon, targetLat, targetLon) < 5.0){           // If the robot is 5 meters or less close to the checkpoint, it is considered to be there
+      // Check if close to the target checkpoint -----------------------------------------------------------------------------------------------------------
+      if(distanceTo(currentLat, currentLon, targetLat, targetLon) < 5.0){                                                // If the robot is 5 meters or less close to the checkpoint, it is considered to be there
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("Checkpoint reached."));
           xSemaphoreGive(semaphoreSerial);
@@ -709,12 +719,12 @@ static void autoPilotTask(void* pvParameters){
           Serial.println(F("\t\t\tSTOP MOTORS"));
           xSemaphoreGive(semaphoreSerial);
         }
-        vTaskDelay(pdMS_TO_TICKS(1000));                                            // The robot stops for a second
+        vTaskDelay(pdMS_TO_TICKS(1000));                                                                                 // The robot stops for a second
 
-        currentCheckpoint++;                                                        // The next checkpoint is loaded
-        if(currentCheckpoint >= totalCheckpoints){                                  // If it is the last checkpoint
+        currentCheckpoint++;                                                                                             // The next checkpoint is loaded
+        if(currentCheckpoint >= totalCheckpoints){                                                                       // If it is the last checkpoint
           if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-            Serial.println(F("\t\t\tAll checkpoints completed. Stopping robot."));             // Stop forever
+            Serial.println(F("\t\t\tAll checkpoints completed. Stopping robot."));                                       // Stop forever
             xSemaphoreGive(semaphoreSerial);
           }
 
@@ -732,11 +742,11 @@ static void autoPilotTask(void* pvParameters){
     vTaskDelay(pdMS_TO_TICKS(250));                                                                                      // Small delay
   }
 }
-// AUTO-PILOT TASK END -----------------------------------------------------------------------------------------------------------------------------------------
+// AUTO-PILOT TASK END -------------------------------------------------------------------------------------------------------------------------------------
 
-// -----------------------------------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 // FUNCION SETUP - SOLO SE EJECUTA UNA VEZ
-// -----------------------------------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 void setup(){
   #if ENABLE_DEBUG == 1                                                                                                  // Activar o desactivar desde "configuration.h" el monitor serial para debugging
     Serial.begin(115200);
@@ -877,7 +887,7 @@ void setup(){
 
   xTaskCreatePinnedToCore(
     autoPilotTask,                                                                                                       /* Function to implement the task */
-    "autoPilotTask",                                                                                                         /* Name of the task */
+    "autoPilotTask",                                                                                                     /* Name of the task */
     5000,                                                                                                                /* Stack size in bytes */
     NULL,                                                                                                                /* Task input parameter */
     1,                                                                                                                   /* Priority of the task */
@@ -891,8 +901,8 @@ void setup(){
   Serial.println(F("Temporizador establecido para 5s, la primera medida se tomara tras dicho tiempo"));
   Serial.println(F("============= SETUP END ============"));
   
-  oled.setTextSize(3);
-  oled.setCursor(40, 17);
+  oled.setTextSize(2);
+  oled.setCursor(15, 20);
   oled.print("DEPLOYED");
   oled.display();
   delay(1000);
@@ -1004,7 +1014,7 @@ static void callback(char* topic, byte* message, unsigned int length){          
     }
 
     // Extract joystick values -----------------------------------------------------------------------------------------------------------------------------
-    if(!AUTO_PILOT && (doc.containsKey("xAxis") || doc.containsKey("yAxis"))){                                             // Joystick/manual mode is only accessible if auto-pilot is not enabled
+    if(!AUTO_PILOT && (doc.containsKey("xAxis") || doc.containsKey("yAxis"))){                                           // Joystick/manual mode is only accessible if auto-pilot is not enabled
       joystickData joyData;
       if(doc.containsKey("xAxis")){
         joyData.potXaxis = doc["xAxis"];
@@ -1013,7 +1023,7 @@ static void callback(char* topic, byte* message, unsigned int length){          
         joyData.potYaxis = doc["yAxis"];
       }
 
-      if(!xQueueSend(joystickQueue, &joyData, portMAX_DELAY)){                                                             // Send data to queue
+      if(!xQueueSend(joystickQueue, &joyData, portMAX_DELAY)){                                                           // Send data to queue
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("Cola del joystick ha fallado!"));
           xSemaphoreGive(semaphoreSerial);
@@ -1049,7 +1059,7 @@ static void reconnect(){
 
     }else{
       if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-        Serial.print(F("failed, rc="));                                                                                  // Si no se establece conexion
+        Serial.print(F("Failed, rc = "));                                                                                // Si no se establece conexion
         Serial.print(mqttClient.state());
         Serial.println(F(" try again in 5 seconds"));                                                                    // Espera 5 segundos hasta reintentar la conexion
         xSemaphoreGive(semaphoreSerial);
@@ -1063,17 +1073,17 @@ static void reconnect(){
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
 // BEARING COMPUTATION
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
-static double calculateBearing(double lat1, double lon1, double lat2, double lon2){     // Calculate straight-line bearing
+static double calculateBearing(double lat1, double lon1, double lat2, double lon2){                                      // Calculate straight-line bearing
   lat1 = radians(lat1);
   lon1 = radians(lon1);
   lat2 = radians(lat2);
   lon2 = radians(lon2);
 
-  double dLon = lon2 - lon1;                                                      // As bearing is an angle, this function works with latitude and longitude directly as they are angles too
+  double dLon = lon2 - lon1;                                                                                             // As bearing is an angle, this function works with latitude and longitude directly as they are angles too
   double dLat = lat2 - lat1;
   
-  double bearing = atan2(dLon, dLat) * 180 / PI;                                  // Convert radians to degrees
-  if(bearing < 0) bearing += 360;                                                 // Normalize to 0-360 degrees
+  double bearing = atan2(dLon, dLat) * 180 / PI;                                                                         // Convert radians to degrees
+  if(bearing < 0) bearing += 360;                                                                                        // Normalize to 0-360 degrees
   return bearing;
 }
 // BEARING COMPUTATION END ---------------------------------------------------------------------------------------------------------------------------------
@@ -1081,7 +1091,7 @@ static double calculateBearing(double lat1, double lon1, double lat2, double lon
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
 // DISTANCE TO THE NEXT CHECKPOINT COMPUTATION
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
-static float distanceTo(double lat1, double lon1, double lat2, double lon2){             // Calculate Euclidean distance
+static float distanceTo(double lat1, double lon1, double lat2, double lon2){                                             // Calculate Euclidean distance
   lat1 = radians(lat1);
   lon1 = radians(lon1);
   lat2 = radians(lat2);
@@ -1090,11 +1100,11 @@ static float distanceTo(double lat1, double lon1, double lat2, double lon2){    
   double dLat = lat2 - lat1;
   double dLon = lon2 - lon1;
 
-  const float METERS_PER_DEGREE_LON = METERS_PER_DEGREE_LAT * cos(lat1 * PI / 180);  // Adjust longitude distance based on latitude accounting for the Earth's curvature
+  const float METERS_PER_DEGREE_LON = METERS_PER_DEGREE_LAT * cos(lat1 * PI / 180);                                      // Adjust longitude distance based on latitude accounting for the Earth's curvature
 
-  float dx = dLat * METERS_PER_DEGREE_LAT;                                        // Difference in latitude converted to meters
-  float dy = dLon * METERS_PER_DEGREE_LON;                                        // Difference in longitude converted to meters
+  float dx = dLat * METERS_PER_DEGREE_LAT;                                                                               // Difference in latitude converted to meters
+  float dy = dLon * METERS_PER_DEGREE_LON;                                                                               // Difference in longitude converted to meters
 
-  return sqrt(dx * dx + dy * dy);                                                 // Pythagorean theorem
+  return sqrt(dx * dx + dy * dy);                                                                                        // Pythagorean theorem
 }
 // DISTANCE TO THE NEXT CHECKPOINT COMPUTATION END ---------------------------------------------------------------------------------------------------------
