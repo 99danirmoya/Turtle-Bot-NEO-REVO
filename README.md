@@ -126,6 +126,8 @@ Toda la explicación del código de Arduino viene dada en el propio código, [`9
 </div>
 <br/>
 
+### Servicios en NodeRED
+
 Por otra parte, se debe importar el flujo que se muestra a continuación desde el archivo [`flow_tbne.json`](https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/nodered_flow/flow_tbne.json):
 
 <div align="center">
@@ -166,6 +168,38 @@ Por otra parte, se puede hacer uso de un bot de Telegram para recibir notificaci
   <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/telegrambot2.jpg" width="550"  style="margin: 10px;"/>
 
   <em>Menú del bot de Telegram para encender o apagar el dispositivo elegido</em>
+</div>
+<br/>
+
+### Servicios en ThingsBoard
+
+Se ha creado, además, un dashboard analogo al de NodeRED, pero en ThingsBoard.
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-general.jpeg" width="550"  style="margin: 10px;"/>
+
+  <em>Dashboard general para acceder al resto de paneles</em>
+</div>
+<br/>
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-control.jpeg" width="550"  style="margin: 10px;"/>
+
+  <em>Dashboard para el control del robot</em>
+</div>
+<br/>
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-weather.jpeg" width="550"  style="margin: 10px;"/>
+
+  <em>Dashboard para acceder a los datos actualizados de meteorología</em>
+</div>
+<br/>
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-airquality.jpeg" width="550"  style="margin: 10px;"/>
+
+  <em>Dashboard para acceder a los datos actualizados de calidad de aire</em>
 </div>
 <br/>
 
