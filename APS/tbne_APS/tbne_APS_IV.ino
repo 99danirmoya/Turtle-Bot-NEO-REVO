@@ -462,7 +462,7 @@ static void flagsTask(void* pvParameters){
       if (notificationValue & (1 << 2)) {
         HOT_ALARM = true;
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tHOT ALARM ON"));
+          Serial.println(F("\t\t\t\tHOT ALARM ON"));
           xSemaphoreGive(semaphoreSerial);
         }
         oled.setCursor(10, 17);
@@ -473,7 +473,7 @@ static void flagsTask(void* pvParameters){
       if (notificationValue & (1 << 3)) {
         HOT_ALARM = false;
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tHOT ALARM OFF"));
+          Serial.println(F("\t\t\t\tHOT ALARM OFF"));
           xSemaphoreGive(semaphoreSerial);
         }
         oled.fillRect(10, 17, 120, 10, BLACK);
@@ -483,7 +483,7 @@ static void flagsTask(void* pvParameters){
       if (notificationValue & (1 << 4)) {
         COLD_ALARM = true;
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tCOLD ALARM ON"));
+          Serial.println(F("\t\t\t\tCOLD ALARM ON"));
           xSemaphoreGive(semaphoreSerial);
         }
         oled.setCursor(10, 29);
@@ -494,7 +494,7 @@ static void flagsTask(void* pvParameters){
       if (notificationValue & (1 << 5)) {
         COLD_ALARM = false;
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tCOLD ALARM OFF"));
+          Serial.println(F("\t\t\t\tCOLD ALARM OFF"));
           xSemaphoreGive(semaphoreSerial);
         }
         oled.fillRect(10, 29, 120, 10, BLACK);
@@ -504,7 +504,7 @@ static void flagsTask(void* pvParameters){
       if (notificationValue & (1 << 6)) {
         POLLUTION_ALARM = true;
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tPOLLUTION ALARM ON"));
+          Serial.println(F("\t\t\t\tPOLLUTION ALARM ON"));
           xSemaphoreGive(semaphoreSerial);
         }
         oled.setCursor(10, 41);
@@ -515,7 +515,7 @@ static void flagsTask(void* pvParameters){
       if (notificationValue & (1 << 7)) {
         POLLUTION_ALARM = false;
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tPOLLUTION ALARM OFF"));
+          Serial.println(F("\t\t\t\tPOLLUTION ALARM OFF"));
           xSemaphoreGive(semaphoreSerial);
         }
         oled.fillRect(10, 41, 120, 10, BLACK);
@@ -525,7 +525,7 @@ static void flagsTask(void* pvParameters){
       if (notificationValue & (1 << 8)) {
         RAIN_ALARM = true;
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tRAIN ALARM ON"));
+          Serial.println(F("\t\t\t\tRAIN ALARM ON"));
           xSemaphoreGive(semaphoreSerial);
         }
         oled.setCursor(10, 53);
@@ -536,7 +536,7 @@ static void flagsTask(void* pvParameters){
       if (notificationValue & (1 << 9)) {
         RAIN_ALARM = false;
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tRAIN ALARM OFF"));
+          Serial.println(F("\t\t\t\tRAIN ALARM OFF"));
           xSemaphoreGive(semaphoreSerial);
         }
         oled.fillRect(10, 53, 120, 10, BLACK);
