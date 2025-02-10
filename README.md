@@ -177,28 +177,28 @@ Por otra parte, se puede hacer uso de un bot de Telegram para recibir notificaci
 Se ha creado, además, un dashboard analogo al de NodeRED, pero en ThingsBoard.
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-general.jpeg" width="550"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-general.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Dashboard general para acceder al resto de paneles</em>
 </div>
 <br/>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-control.jpeg" width="550"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-control.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Dashboard para el control del robot</em>
 </div>
 <br/>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-weather.jpeg" width="550"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-weather.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Dashboard para acceder a los datos actualizados de meteorología</em>
 </div>
 <br/>
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-airquality.jpeg" width="550"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-airquality.jpeg" width="900"  style="margin: 10px;"/>
 
   <em>Dashboard para acceder a los datos actualizados de calidad de aire</em>
 </div>
