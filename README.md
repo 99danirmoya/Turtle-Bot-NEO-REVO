@@ -15,7 +15,7 @@ _Servicios en la nube ofrecidos por_
 </div>
 <br/>
 
-## Mini rover WiFi con sensor climático y de material particulado, GPS, mangnetómetro, panel OLED, luces LED y bocina controlado desde Telegram y NodeRED Dashboard/Thingsboard a los que se envían los datos recogidos en tiempo real. Cuenta con dos modos de operación: manual y auto-pilotado por coordenadas GPS
+## Mini rover WiFi con camara digital, sensor climático y de material particulado, GPS, mangnetómetro, panel OLED, luces LED y bocina controlado desde Telegram y NodeRED Dashboard/Thingsboard a los que se envían los datos recogidos en tiempo real. Cuenta con dos modos de operación: manual y auto-pilotado por coordenadas GPS
 
 </div>
 
@@ -67,6 +67,7 @@ ___
 | Componente | Unidades |
 | ------------- | ------------- |
 | LilyGO T3 S3 | 1 |
+| ESP32 CAM | 1 |
 | Protoboard | 1 |
 | Chasis | 1 |
 | LED | 1 |
@@ -200,6 +201,15 @@ Se ha creado, además, un dashboard analogo al de NodeRED, pero en ThingsBoard.
   <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/dashboard-airquality.jpeg" width="550"  style="margin: 10px;"/>
 
   <em>Dashboard para acceder a los datos actualizados de calidad de aire</em>
+</div>
+<br/>
+
+Como servicio adicional al dashboard de Thingsboard, se ha creado una aplicacion en Android Studio que permite consultar todos los sensores, la cámara, controlar el rover con un joystick y recibir notificaciones de alarmas. La conexión de la app con Thingsboard ha sido gracias a la RESTful API que provee.
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/Screenshot%202025-02-10%20113812.png" width="550"  style="margin: 10px;"/>
+
+  <em>Aplicación para Android con conexión a Thingsboard</em>
 </div>
 <br/>
 
