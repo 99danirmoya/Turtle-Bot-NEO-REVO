@@ -92,7 +92,7 @@ ___
 La tarjeta de prototipado específica empleada para el desarrollo ha sido la LilyGO T3-S3 v1.2:
 
 <div align="center">
-  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/Screenshot%202025-01-18%20221859.png" width="600"  style="margin: 10px;"/>
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-EVO/blob/main/pics/Screenshot%202025-01-18%20221859.png" width="900"  style="margin: 10px;"/>
   
   <em>Pinout de la tarjeta de prototipado LilyGO T3-S3 v1.2</em>
 </div>
@@ -210,6 +210,15 @@ Como servicio adicional al dashboard de Thingsboard, se ha creado una aplicacion
   <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/Screenshot%202025-02-10%20113812.png" width="900"  style="margin: 10px;"/>
 
   <em>Aplicación para Android con conexión a Thingsboard</em>
+</div>
+<br/>
+
+La arquitectura de red se puede consultar en el diagrama a continuación:
+
+<div align="center">
+  <img src="https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/pics/Screenshot%202025-02-10%20114958.png" width="900"  style="margin: 10px;"/>
+
+  <em>Arquitectura de red con Thingsboard</em>
 </div>
 <br/>
 
