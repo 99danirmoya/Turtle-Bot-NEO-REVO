@@ -4,6 +4,10 @@
 
 <div align="center">
 
+_Desarrollado por_
+
+_César Rubio Sánchez, Alejandro Martín Sánchez, Daniel Rodríguez Moya y Álvaro Rodríguez Piñeiro_
+
 _Programado en_
 
 [![made-in-ArduinoIDE](https://img.shields.io/badge/Arduino_IDE-00979D?style=for-the-badge&logo=arduino&logoColor=white)](https://www.arduino.cc/)
@@ -238,4 +242,4 @@ ___
 > 
 > Más información sobre mis proyectos: [![Linkedin Badge](https://img.shields.io/badge/-LinkedIn-blue?style=for-the-badge&logo=Linkedin&logoColor=white&link=https://www.linkedin.com/in/daniel-rodr%C3%ADguez-moya-510a35167)](https://www.linkedin.com/in/daniel-rodr%C3%ADguez-moya-510a35167)
 
-_<p align="justify"> Autor: Daniel Rodríguez Moya :shipit: </p>_
+_<p align="justify"> Autores: César Rubio Sánchez, Alejandro Martín Sánchez, Daniel Rodríguez Moya y Álvaro Rodríguez Piñeiro :shipit: </p>_
