@@ -114,7 +114,7 @@ A continuación, se muestra el diagrama de conexiones del robot.
 <br/>
 
 > [!CAUTION]
-> **OJO**, el microcontrolador usado en el dibujo es el TTGO LoRa32 OLED, antecesor del LilyGO T3-S3 v1.2 que se emplea en este ejemplo. Por ello, el pinout del esquema es distinto, **sólo se debe seguir la ubicación de los pines**.
+> **OJO**, el microcontrolador usado en el dibujo es el TTGO LoRa32 OLED, antecesor del LilyGO T3-S3 v1.2 que se emplea en este ejemplo. Por ello, el pinout del esquema es distinto, **sólo se debe seguir la ubicación de los pines. Por parte de la ESP32 CAM, no se incluye en el diagrama ya que se puede considerar un SoC**.
 
 <div align="justify">
 
