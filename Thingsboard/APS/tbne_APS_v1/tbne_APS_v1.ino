@@ -78,6 +78,7 @@ que reciben los parametros de un dashboard de NodeRED por medio de estar suscrit
 #define SEALEVELPRESSURE_HPA (1015)                                                                                      // Referencia de la presion atmosferica al nivel del mar
 
 // Macros luz LED --------------------------------------------------------------------------------------------------------------------------------------------
+#define BUILTIN_LED 37                                                                                                   // Built-in LED inner pin
 #define LED_PIN 40
 #define FREQUENCY 5000                                                                                                   // Frecuencia de la señal PWM
 #define RESOLUTION 8                                                                                                     // Resolucion del PWM
@@ -284,6 +285,7 @@ static void sensorTask(void* pvParameters){
     if(xTaskNotifyWait(0, 0xFFFFFFFF, &notificationValue, pdMS_TO_TICKS(10))){
       if(notificationValue & (1 << 10)) {
         AUTO_PILOT = true;
+        digitalWrite(BUILTIN_LED, HIGH);
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("\tAUTO-PILOT ENGAGED"));
           xSemaphoreGive(semaphoreSerial);
@@ -291,6 +293,7 @@ static void sensorTask(void* pvParameters){
       }
       if(notificationValue & (1 << 11)){
         AUTO_PILOT = false;
+        digitalWrite(BUILTIN_LED, LOW);
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
           Serial.println(F("\tAUTO-PILOT DISABLED"));
           xSemaphoreGive(semaphoreSerial);
@@ -339,13 +342,8 @@ static void sensorTask(void* pvParameters){
       aData.lat = latTemp;
       aData.lon = lonTemp;
       
-      // Queue sender
-      if(!xQueueSend(sensorQueueAP, &aData, 0)){
-        if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\tCola de sensores auto-pilot ha fallado!"));
-          xSemaphoreGive(semaphoreSerial);
-        }
-      }
+      // Queue overwrite as the important thing is to consume the latest data as quickly as possible and not in order, it only returns pdTRUE, so it does not return errors
+      xQueueOverwrite(sensorQueueAP, &aData);
     }
     // Auto-pilot queue END ----------------------------------------------------------------------------------------------------------------------------------
 
@@ -420,7 +418,7 @@ static void sensorTask(void* pvParameters){
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    vTaskDelay(pdMS_TO_TICKS(500));                                                                                      // Read every 250 seconds, the most demanding queue
+    vTaskDelay(pdMS_TO_TICKS(500));                                                                                      // Read every 500 milliseconds, the most demanding queue (auto-pilot)
   }
 }
 // SENSOR TASK END -------------------------------------------------------------------------------------------------------------------------------------------
@@ -580,7 +578,7 @@ static void flagsTask(void* pvParameters){
 // ACTUATOR TASK - TRAS HABERSE COMPLETADO LA CONFIGURACION INICIAL, ESTE ES EL ALGORITMO PARA EJECUTAR LAS ORDENES DE LOS SERVOS
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 static void actuatorTask(void* pvParameters){
-  int8_t servoXPosition, servoYPosition;
+  int8_t servoXPosition = 0, servoYPosition = 0;
 
   while (true) {
     joystickData joyData;
@@ -619,7 +617,7 @@ static void actuatorTask(void* pvParameters){
         El hecho de que, por ejemplo, hacia adelante sea LEFT a 45 y RIGHT a 135 es porque los motores están cambiados de sentido cuando
         se montan en el chasis                                                                                                        */
     }
-    vTaskDelay(pdMS_TO_TICKS(750));                                                                                      // Small delay
+    vTaskDelay(pdMS_TO_TICKS(1000));                                                                                      // Joystick values are published every second, so this task matches the rate
   }
 }
 // ACTUATOR TASK END -----------------------------------------------------------------------------------------------------------------------------------------
@@ -635,7 +633,7 @@ static void autoPilotTask(void* pvParameters){
     {43.525510, -5.630115},
     {43.527104, -5.630602},
     {43.527208, -5.632747}
-  };
+  };                                                                                                                     // Checkpoints route consisting on a matrix where 'j' is fixed as coordinates are 2D, but 'i' is left sizeless to allow more checkpoints
 
   const int totalCheckpoints = sizeof(checkpoints) / sizeof(checkpoints[0]);                                             // Autoadjastable checkpoint number the first 'sizeof' is the total amount of elements while the second is always 16 bytes, as it is the amount of elements to define a coordinate
   int currentCheckpoint = 0;                                                                                             // Checkpoint controller
@@ -643,103 +641,113 @@ static void autoPilotTask(void* pvParameters){
   while (true) {
     APData aData;
 
-    if(!xQueueReceive(sensorQueueAP, &aData, portMAX_DELAY)){
-      if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-        Serial.println(F("\t\t\tError recibiendo datos de la cola del auto-pilot"));
-        xSemaphoreGive(semaphoreSerial);
-      }
-    }else{
+    if(xQueuePeek(sensorQueueAP, &aData, 0)){                                                                            // As xQueueOverwrite is used to send data, the only necessary thing is to check the values, not consume them
       // Get current and target coordinates ----------------------------------------------------------------------------------------------------------------
       double currentLat = aData.lat;
       double currentLon = aData.lon;
       double targetLat = checkpoints[currentCheckpoint][0];
       double targetLon = checkpoints[currentCheckpoint][1];
 
-      if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-        Serial.print(F("\t\t\tCurrent Location: "));
-        Serial.print(currentLat, 6);
-        Serial.print(F(", "));
-        Serial.println(currentLon, 6);
-        xSemaphoreGive(semaphoreSerial);
-      }
-
-      // Calculate bearing to target -----------------------------------------------------------------------------------------------------------------------
-      double targetBearing = calculateBearing(currentLat, currentLon, targetLat, targetLon);
-
-      // Get current heading from queue --------------------------------------------------------------------------------------------------------------------
-      double currentHeading = aData.heading;
-
-      if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-        Serial.print(F("\t\t\tTarget Bearing: "));
-        Serial.println(targetBearing);                                                                                   // Next checkpoint orientation angle
-        Serial.print(F("Current Heading: "));
-        Serial.println(currentHeading);                                                                                  // Current orientation angle
-        xSemaphoreGive(semaphoreSerial);
-      }
-      
-      // Adjust direction ----------------------------------------------------------------------------------------------------------------------------------
-      double bearingDifference = targetBearing - currentHeading;                                                         // Bearing difference is the substraction of the target orientation and the current one
-      if(bearingDifference > 180) bearingDifference -= 360;                                                              // Bearings must be in the [-180, 180] degree range, so if it exceeds 180º, it must be replaced by its equivalent negative counterpart in the valid range
-      if(bearingDifference < -180) bearingDifference += 360;                                                             // Same for those bearings exceeding -180
-
-      if(abs(bearingDifference) > 10){                                                                                   // If the bearing difference is significant (10 degrees or more in any orientation)
-        if(bearingDifference > 0){                                                                                       // If the bearing difference is positive, turn to the opposite direction, RIGHT
-          miServoRight.write(CLOCKWISE_RIGHT);
-          miServoLeft.write(CLOCKWISE_LEFT);
-          if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-            Serial.println(F("\t\t\tCLOCKWISE COUNTERSTEER"));
-            xSemaphoreGive(semaphoreSerial);
-          }
-        }else{                                                                                                           // Do the same if the difference is negative
-          miServoRight.write(COUNTERCLOCKWISE_RIGHT);
-          miServoLeft.write(COUNTERCLOCKWISE_LEFT);
-          if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-            Serial.println(F("\t\t\tCOUNTERCLOCKWISE COUNTERSTEER"));
-            xSemaphoreGive(semaphoreSerial);
-          }
-        }
-      }else{                                                                                                             // If not, no correction is needed, so move towards the next checkpoint
-        miServoRight.write(FORWARD_RIGHT);
-        miServoLeft.write(FORWARD_LEFT);
-        if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tMOVING FORWARD"));
-          xSemaphoreGive(semaphoreSerial);
-        }
-      }
-
-      // Check if close to the target checkpoint -----------------------------------------------------------------------------------------------------------
-      if(distanceTo(currentLat, currentLon, targetLat, targetLon) < 5.0){                                                // If the robot is 5 meters or less close to the checkpoint, it is considered to be there
-        if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("Checkpoint reached."));
-          xSemaphoreGive(semaphoreSerial);
-        }
-        miServoRight.write(STOP_RIGHT);
+      if(currentLat == 0.0f || currentLon == 0.0f){                                                                      // If GPS fix has not been achieved
+        miServoRight.write(STOP_RIGHT);                                                                                  // Both motors stay still
         miServoLeft.write(STOP_LEFT);
         if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-          Serial.println(F("\t\t\tSTOP MOTORS"));
+          Serial.println(F("\t\t\tAUTO-PILOT IS WAITING FOR GPS LOCK..."));                                              // Print an error every second
           xSemaphoreGive(semaphoreSerial);
         }
-        vTaskDelay(pdMS_TO_TICKS(1000));                                                                                 // The robot stops for a second
+        vTaskDelay(pdMS_TO_TICKS(500));                                                                                  // Delay to wait 1 second between (500 ms of the task + 500 ms of the condition)
+      }else{                                                                                                             // If GPS fix has been achieved, run auto-pilot normally
+        if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+          Serial.print(F("\t\t\tCurrent Location: "));
+          Serial.print(currentLat, 6);
+          Serial.print(F(", "));
+          Serial.println(currentLon, 6);
+          xSemaphoreGive(semaphoreSerial);
+        }
 
-        currentCheckpoint++;                                                                                             // The next checkpoint is loaded
-        if(currentCheckpoint >= totalCheckpoints){                                                                       // If it is the last checkpoint
+        // Calculate bearing to target -----------------------------------------------------------------------------------------------------------------------
+        double targetBearing = calculateBearing(currentLat, currentLon, targetLat, targetLon);
+
+        // Get current heading from queue --------------------------------------------------------------------------------------------------------------------
+        double currentHeading = aData.heading;
+
+        if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+          Serial.print(F("\t\t\tTarget Bearing: "));
+          Serial.println(targetBearing);                                                                                   // Next checkpoint orientation angle
+          Serial.print(F("Current Heading: "));
+          Serial.println(currentHeading);                                                                                  // Current orientation angle
+          xSemaphoreGive(semaphoreSerial);
+        }
+        
+        // Adjust direction ----------------------------------------------------------------------------------------------------------------------------------
+        double bearingDifference = targetBearing - currentHeading;                                                         // Bearing difference is the substraction of the target orientation and the current one
+        if(bearingDifference > 180) bearingDifference -= 360;                                                              // Bearings must be in the [-180, 180] degree range, so if it exceeds 180º, it must be replaced by its equivalent negative counterpart in the valid range
+        if(bearingDifference < -180) bearingDifference += 360;                                                             // Same for those bearings exceeding -180
+
+        if(abs(bearingDifference) > 10){                                                                                   // If the bearing difference is significant (10 degrees or more in any orientation)
+          if(bearingDifference > 0){                                                                                       // If the bearing difference is positive, turn to the opposite direction, RIGHT
+            miServoRight.write(CLOCKWISE_RIGHT);
+            miServoLeft.write(CLOCKWISE_LEFT);
+            if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+              Serial.println(F("\t\t\tCLOCKWISE COUNTERSTEER"));
+              xSemaphoreGive(semaphoreSerial);
+            }
+          }else{                                                                                                           // Do the same if the difference is negative
+            miServoRight.write(COUNTERCLOCKWISE_RIGHT);
+            miServoLeft.write(COUNTERCLOCKWISE_LEFT);
+            if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+              Serial.println(F("\t\t\tCOUNTERCLOCKWISE COUNTERSTEER"));
+              xSemaphoreGive(semaphoreSerial);
+            }
+          }
+        }else{                                                                                                             // If not, no correction is needed, so move towards the next checkpoint
+          miServoRight.write(FORWARD_RIGHT);
+          miServoLeft.write(FORWARD_LEFT);
           if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-            Serial.println(F("\t\t\tAll checkpoints completed. Stopping robot."));                                       // Stop forever
+            Serial.println(F("\t\t\tMOVING FORWARD"));
             xSemaphoreGive(semaphoreSerial);
           }
+        }
 
-          while(1){
-            miServoRight.write(STOP_RIGHT);
-            miServoLeft.write(STOP_LEFT);
+        // Check if close to the target checkpoint -----------------------------------------------------------------------------------------------------------
+        if(distanceTo(currentLat, currentLon, targetLat, targetLon) < 5.0){                                                // If the robot is 5 meters or less close to the checkpoint, it is considered to be there
+          if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+            Serial.println(F("Checkpoint reached."));
+            xSemaphoreGive(semaphoreSerial);
+          }
+          miServoRight.write(STOP_RIGHT);
+          miServoLeft.write(STOP_LEFT);
+          if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+            Serial.println(F("\t\t\tSTOP MOTORS"));
+            xSemaphoreGive(semaphoreSerial);
+          }
+          vTaskDelay(pdMS_TO_TICKS(1000));                                                                                 // The robot stops for a second
+
+          currentCheckpoint++;                                                                                             // The next checkpoint is loaded
+          if(currentCheckpoint >= totalCheckpoints){                                                                       // If it is the last checkpoint
             if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
-              Serial.println(F("\t\t\tSTOP MOTORS"));
+              Serial.println(F("\t\t\tAll checkpoints completed. Stopping robot."));                                       // Stop forever
               xSemaphoreGive(semaphoreSerial);
+            }
+
+            while(1){
+              miServoRight.write(STOP_RIGHT);
+              miServoLeft.write(STOP_LEFT);
+              if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+                Serial.println(F("\t\t\tSTOP MOTORS"));
+                xSemaphoreGive(semaphoreSerial);
+              }
             }
           }
         }
       }
+    }else{                                                                                                               // Error from xQueuePeek comes when the queue is empty, only at the very beginning
+      if(xSemaphoreTake(semaphoreSerial, portMAX_DELAY)){
+        Serial.println(F("\t\t\tCola del auto-pilot vacia"));
+        xSemaphoreGive(semaphoreSerial);
+      }
     }
-    vTaskDelay(pdMS_TO_TICKS(250));                                                                                      // Small delay
+    vTaskDelay(pdMS_TO_TICKS(500));                                                                                      // General delay for the auto-pilot
   }
 }
 // AUTO-PILOT TASK END -------------------------------------------------------------------------------------------------------------------------------------
@@ -761,6 +769,8 @@ void setup(){
 
   // LED ---------------------------------------------------------------------------------------------------------------------------------------------------
   ledcAttach(LED_PIN, FREQUENCY, RESOLUTION);                                                                            // Inicializacion del PWM para el LED
+  pinMode(BUILTIN_LED, OUTPUT);
+  digitalWrite(BUILTIN_LED, LOW);                                                                                        // Inicializar LED built-in apagado
 
   // Servos ------------------------------------------------------------------------------------------------------------------------------------------------
   miServoRight.attach(PIN_SERVO_RIGHT);                                                                                  // Union del servo al pin correspondiente
