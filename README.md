@@ -44,12 +44,12 @@ ___
 ___
 
 ## Índice
-1. [Modo de funcionamiento](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#modo-de-funcionamiento)
-2. [Lista de componentes](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#--lista-de-componentes-)
-3. [Diagrama de conexiones](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#diagrama-de-conexiones)
-4. [Modo de implementación](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#modo-de-implementaci%C3%B3n)
-5. [Licencia](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#-licencia-)
-6. [Contacto](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#-contacto-)
+### 1. [Modo de funcionamiento](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#modo-de-funcionamiento)
+### 2. [Lista de componentes](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#--lista-de-componentes-)
+### 3. [Diagrama de conexiones](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#diagrama-de-conexiones)
+### 4. [Modo de implementación](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#modo-de-implementaci%C3%B3n)
+### 5. [Licencia](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#-licencia-)
+### 6. [Contacto](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#-contacto-)
 
 ___
 ___
@@ -130,6 +130,12 @@ Toda la explicación del código de Arduino viene dada en el propio código, [`9
   <em>Diagrama de bloques de la implementación en freeRTOS</em>
 </div>
 <br/>
+
+De esta manera, las funcionalidades principales son:
+1. Monitoreo de variables climáticas y de contaminacion
+2. Sistema de alarmas remoto y local (LED, OLED y sirena) en caso de riesgo para ganado/cosecha
+3. Piloto manual por joystick virtual con información sobre geolocalización, orientación, velocidad e imagen
+4. Piloto automático por ruta de coordenadas GPS
 
 ### Servicios en NodeRED
 
@@ -232,6 +238,8 @@ ___
 ## <p align="justify"> Licencia [:leftwards_arrow_with_hook:](https://github.com/99danirmoya/Turtle-Bot-NEO-REVO/blob/main/README.md#%C3%ADndice) </p>
 
 Este proyecto está licenciado bajo la [GPL-3.0 license](https://github.com/99danirmoya/turtle-bot-neo?tab=GPL-3.0-1-ov-file).
+
+</div>
 
 ___
 
