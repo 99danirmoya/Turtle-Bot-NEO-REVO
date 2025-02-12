@@ -6,7 +6,7 @@
 
 _Desarrollado por_
 
-_César Rubio Sánchez, Alejandro Martín Sánchez, Daniel Rodríguez Moya y Álvaro Rodríguez Piñeiro_
+`César Rubio Sánchez`, `Alejandro Martín Sánchez`, `Daniel Rodríguez Moya` y `Álvaro Rodríguez Piñeiro`
 
 _Programado en_
 
